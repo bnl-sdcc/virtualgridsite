@@ -1,0 +1,93 @@
+===============================================================================
+    Some info about how we get a single host htcondor pool to work
+===============================================================================
+
+[root@grid04 ~]# uname -a
+Linux grid04.racf.bnl.gov 2.6.32-642.1.1.el6.x86_64 #1 SMP Fri May 6 14:54:05 EDT 2016 x86_64 x86_64 x86_64 GNU/Linux
+
+===============================================================================
+
+[root@grid04 ~]# rpm -qa | grep condor
+condor-classads-8.4.8-1.el6.x86_64
+condor-procd-8.4.8-1.el6.x86_64
+condor-external-libs-8.4.8-1.el6.x86_64
+condor-8.4.8-1.el6.x86_64
+
+===============================================================================
+
+[root@grid04 ~]# yum info condor
+Loaded plugins: priorities, product-id, rhnplugin, search-disabled-repos, security, subscription-manager
+This system is receiving updates from RHN Classic or RHN Satellite.
+2012 packages excluded due to repository priority protections
+Installed Packages
+Name        : condor
+Arch        : x86_64
+Version     : 8.4.8
+Release     : 1.el6
+Size        : 18 M
+Repo        : installed
+From repo   : htcondor-stable
+Summary     : HTCondor: High Throughput Computing
+URL         : http://www.cs.wisc.edu/condor/
+License     : ASL 2.0
+Description : HTCondor is a specialized workload management system for
+            : compute-intensive jobs. Like other full-featured batch systems, HTCondor
+            : provides a job queueing mechanism, scheduling policy, priority scheme,
+            : resource monitoring, and resource management. Users submit their
+            : serial or parallel jobs to HTCondor, HTCondor places them into a queue,
+            : chooses when and where to run the jobs based upon a policy, carefully
+            : monitors their progress, and ultimately informs the user upon
+            : completion.
+
+Available Packages
+Name        : condor
+Arch        : i386
+Version     : 8.4.8
+Release     : 1.osg33.el6
+Size        : 4.3 M
+Repo        : osg
+Summary     : HTCondor: High Throughput Computing
+URL         : http://www.cs.wisc.edu/condor/
+License     : ASL 2.0
+Description : HTCondor is a specialized workload management system for
+            : compute-intensive jobs. Like other full-featured batch systems, HTCondor
+            : provides a job queueing mechanism, scheduling policy, priority scheme,
+            : resource monitoring, and resource management. Users submit their
+            : serial or parallel jobs to HTCondor, HTCondor places them into a queue,
+            : chooses when and where to run the jobs based upon a policy, carefully
+            : monitors their progress, and ultimately informs the user upon
+            : completion.
+
+Name        : condor
+Arch        : x86_64
+Version     : 8.4.8
+Release     : 1.osg33.el6
+Size        : 4.2 M
+Repo        : osg
+Summary     : HTCondor: High Throughput Computing
+URL         : http://www.cs.wisc.edu/condor/
+License     : ASL 2.0
+Description : HTCondor is a specialized workload management system for
+            : compute-intensive jobs. Like other full-featured batch systems, HTCondor
+            : provides a job queueing mechanism, scheduling policy, priority scheme,
+            : resource monitoring, and resource management. Users submit their
+            : serial or parallel jobs to HTCondor, HTCondor places them into a queue,
+            : chooses when and where to run the jobs based upon a policy, carefully
+            : monitors their progress, and ultimately informs the user upon
+            : completion.
+
+
+===============================================================================
+
+[root@grid04 ~]# history
+yum install --disablerepo=osg-release-x86_64 --disablerepo=osg condor
+vi /etc/condor/config.d/99-nova.config 
+condor_store_cred -f /etc/condor/password_file
+useradd slot1
+useradd slot2
+useradd slot3
+useradd slot4
+useradd slot5
+useradd slot6
+
+===============================================================================
