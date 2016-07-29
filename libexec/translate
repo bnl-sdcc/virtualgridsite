@@ -1,0 +1,67 @@
+#!/usr/bin/env python 
+
+import sys
+import classad
+
+
+
+route_ad = classad.ClassAd(sys.stdin.readline())
+separator_line = sys.stdin.readline()
+assert separator_line == "------\n"
+ad = classad.parseOld(sys.stdin)
+
+#ad['RandomClassAd'] = 'randomvalue'
+#g = open('/tmp/owner', 'w')
+#if ad.eval('Owner') == 'jcaballero':
+#    print >> g, "It is jcaballero"
+#else:
+#    print >> g, "It is not jcaballero"
+
+# -- testing that I can do things ---
+f = open('/tmp/translate', 'w')
+print >> f, "translate"
+print >> f, ad.printOld()
+
+# ----------------------------------------
+# playing with the nova client
+# ----------------------------------------
+
+try:
+    from novissima import NovaCore
+    print >> f, "\n--- nova ---\n" 
+    print >> f, dir(NovaCore) 
+
+    from ConfigParser import SafeConfigParser
+    c = SafeConfigParser()
+    c.readfp(open('/etc/virtualgridsite/nova.conf'))
+    VERSION = c.get('NOVA', 'VERSION') 
+    USERNAME = c.get('NOVA', 'OS_USERNAME')
+    PASSWORD = c.get('NOVA', 'OS_PASSWORD')
+    TENANT = c.get('NOVA', 'OS_TENANT_NAME')
+    URL = c.get('NOVA', 'OS_AUTH_URL')
+    nova = NovaCore(VERSION, USERNAME, PASSWORD, TENANT, URL)
+
+    image = nova.get_image('centos7-bare-cloud')
+    flavor = nova.get_flavor('m1.medium')
+    nova.create_server("centos7-bare-cloud-caballer-160727", image, flavor)
+
+except Exception, ex:
+    print >> f, "not able to import NovaCore"
+
+
+if "OpSysAndVer" in ad:
+    print >> f, "value of OpSysAndVer is %s" %ad.eval('OpSysAndVer')
+else:
+    print >> f, "no value of OpSysAndVer"
+
+
+
+
+# ----------------------------------------
+
+
+
+print ad.printOld(),
+
+sys.exit(0)
+

@@ -1,0 +1,34 @@
+#!/usr/bin/env python 
+
+import sys
+
+# -- testing that I can do things ---
+f = open('/tmp/cleanup', 'w')
+print >> f, "cleanup"
+
+
+try:
+    from novissima import NovaCore
+    print >> f, "\n--- nova ---\n"
+    print >> f, dir(NovaCore)
+
+    from ConfigParser import SafeConfigParser
+    c = SafeConfigParser()
+    c.readfp(open('/etc/virtualgridsite/nova.conf'))
+    VERSION = c.get('NOVA', 'VERSION') 
+    USERNAME = c.get('NOVA', 'OS_USERNAME')
+    PASSWORD = c.get('NOVA', 'OS_PASSWORD')
+    TENANT = c.get('NOVA', 'OS_TENANT_NAME')
+    URL = c.get('NOVA', 'OS_AUTH_URL')
+    nova = NovaCore(VERSION, USERNAME, PASSWORD, TENANT, URL)
+
+    server = nova.get_server("centos7-bare-cloud-caballer-160727")
+    nova.delete_server(server)
+
+
+except Exception, ex:
+    print >> f, "not able to import NovaCore"
+
+
+
+sys.exit(0)
