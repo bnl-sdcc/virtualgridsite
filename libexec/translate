@@ -40,13 +40,6 @@ try:
     flavor = nova.get_flavor('m1.medium')
     nova.create_server("centos7-bare-cloud-caballer-160727", image, flavor)
 
-    import os
-    os.environ['OS_USERNAME'] = 'jcaballero'
-    os.environ['OS_PASSWORD'] = 'jcaballeropw'
-    os.environ['OS_TENANT_NAME'] = 'osgsoft'
-    os.environ['OS_AUTH_URL'] = 'http://cldext02.usatlas.bnl.gov:35357/v2.0/'
-    import commands
-    print >> f, commands.getoutput('nova list')
 
 except Exception, ex:
     print >> f, "not able to import NovaCore"
