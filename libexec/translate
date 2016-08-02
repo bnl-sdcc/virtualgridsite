@@ -11,11 +11,6 @@ assert separator_line == "------\n"
 ad = classad.parseOld(sys.stdin)
 
 #ad['RandomClassAd'] = 'randomvalue'
-#g = open('/tmp/owner', 'w')
-#if ad.eval('Owner') == 'jcaballero':
-#    print >> g, "It is jcaballero"
-#else:
-#    print >> g, "It is not jcaballero"
 
 # -- testing that I can do things ---
 f = open('/tmp/translate', 'w')
@@ -45,6 +40,14 @@ try:
     flavor = nova.get_flavor('m1.medium')
     nova.create_server("centos7-bare-cloud-caballer-160727", image, flavor)
 
+    import os
+    os.environ['OS_USERNAME'] = 'jcaballero'
+    os.environ['OS_PASSWORD'] = 'jcaballeropw'
+    os.environ['OS_TENANT_NAME'] = 'osgsoft'
+    os.environ['OS_AUTH_URL'] = 'http://cldext02.usatlas.bnl.gov:35357/v2.0/'
+    import commands
+    print >> f, commands.getoutput('nova list')
+
 except Exception, ex:
     print >> f, "not able to import NovaCore"
 
@@ -53,6 +56,8 @@ if "OpSysAndVer" in ad:
     print >> f, "value of OpSysAndVer is %s" %ad.eval('OpSysAndVer')
 else:
     print >> f, "no value of OpSysAndVer"
+
+
 
 
 
