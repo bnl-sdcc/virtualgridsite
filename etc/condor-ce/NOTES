@@ -10,3 +10,50 @@ osg-htcondor-ce-condor-3.3-7.osg33.el6.x86_64
 osg-htcondor-ce-3.3-7.osg33.el6.x86_64
 
 
+
+[root@grid04 condor-ce]# yum info htcondor-ce
+Loaded plugins: priorities, product-id, rhnplugin, search-disabled-repos, security, subscription-manager
+This system is receiving updates from RHN Classic or RHN Satellite.
+1855 packages excluded due to repository priority protections
+Installed Packages
+Name        : htcondor-ce
+Arch        : noarch
+Version     : 2.0.7
+Release     : 1.osg33.el6
+Size        : 55 k
+Repo        : installed
+From repo   : osg-release-x86_64
+Summary     : A framework to run HTCondor as a CE
+URL         : http://github.com/opensciencegrid/htcondor-ce
+License     : Apache 2.0
+Description : A framework to run HTCondor as a CE
+
+Available Packages
+Name        : htcondor-ce
+Arch        : x86_64
+Version     : 2.0.2
+Release     : 1.osg33.el6
+Size        : 33 k
+Repo        : osg-release-x86_64
+Summary     : A framework to run HTCondor as a CE
+URL         : http://github.com/opensciencegrid/htcondor-ce
+License     : Apache 2.0
+Description : A framework to run HTCondor as a CE
+
+[root@grid04 condor-ce]# yum info osg-htcondor-ce
+Loaded plugins: priorities, product-id, rhnplugin, search-disabled-repos, security, subscription-manager
+This system is receiving updates from RHN Classic or RHN Satellite.
+1855 packages excluded due to repository priority protections
+Installed Packages
+Name        : osg-htcondor-ce
+Arch        : x86_64
+Version     : 3.3
+Release     : 7.osg33.el6
+Size        : 0.0  
+Repo        : installed
+From repo   : osg-release-x86_64
+Summary     : OSG Compute Element (HTCondor-CE-only)
+URL         : http://www.opensciencegrid.org
+License     : Apache 2.0
+Description : OSG Compute Element (HTCondor-CE-only)
+
