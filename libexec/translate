@@ -21,37 +21,38 @@ print >> f, ad.printOld()
 # playing with the nova client
 # ----------------------------------------
 
-try:
-    from novissima import NovaCore
-    print >> f, "\n--- nova ---\n" 
-    print >> f, dir(NovaCore) 
-
-    from ConfigParser import SafeConfigParser
-    c = SafeConfigParser()
-    c.readfp(open('/etc/virtualgridsite/nova.conf'))
-    VERSION = c.get('NOVA', 'VERSION') 
-    USERNAME = c.get('NOVA', 'OS_USERNAME')
-    PASSWORD = c.get('NOVA', 'OS_PASSWORD')
-    TENANT = c.get('NOVA', 'OS_TENANT_NAME')
-    URL = c.get('NOVA', 'OS_AUTH_URL')
-    nova = NovaCore(VERSION, USERNAME, PASSWORD, TENANT, URL)
-
-    image = nova.get_image('centos7-bare-cloud')
-    flavor = nova.get_flavor('m1.medium')
-    nova.create_server("centos7-bare-cloud-caballer-160727", image, flavor)
-
-
-except Exception, ex:
-    print >> f, "not able to import NovaCore"
-
-
 print >> f, "REQUIREMENTS CAPTURED"
 if "opsys" in ad and ad.eval('opsys')=="LINUX" and\
 "opsysname" in ad and ad.eval('opsysname') == 'CentOS' and\
 "opsysmajorversion" in ad and ad.eval('opsysmajorversion') == '7':
-        print >> f, ad.eval('opsys')
-        print >> f, ad.eval('opsysname')
-        print >> f, ad.eval('opsysmajorversion')
+    print >> f, ad.eval('opsys')
+    print >> f, ad.eval('opsysname')
+    print >> f, ad.eval('opsysmajorversion')
+
+    try:
+        from novissima import NovaCore
+        print >> f, "\n--- nova ---\n" 
+        print >> f, dir(NovaCore) 
+    
+        from ConfigParser import SafeConfigParser
+        c = SafeConfigParser()
+        c.readfp(open('/etc/virtualgridsite/nova.conf'))
+        VERSION = c.get('NOVA', 'VERSION') 
+        USERNAME = c.get('NOVA', 'OS_USERNAME')
+        PASSWORD = c.get('NOVA', 'OS_PASSWORD')
+        TENANT = c.get('NOVA', 'OS_TENANT_NAME')
+        URL = c.get('NOVA', 'OS_AUTH_URL')
+        nova = NovaCore(VERSION, USERNAME, PASSWORD, TENANT, URL)
+    
+        image = nova.get_image('centos7-osg-condor-execute-grid20-2016-08-03-1823')
+        flavor = nova.get_flavor('m1.medium')
+        nova.create_server("centos7-osg-condor-grid20-TESTING", image, flavor)
+ 
+    
+    except Exception, ex:
+        print >> f, "not able to import NovaCore"
+    
+
 
 
 
