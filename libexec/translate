@@ -45,11 +45,13 @@ except Exception, ex:
     print >> f, "not able to import NovaCore"
 
 
-if "OpSysAndVer" in ad:
-    print >> f, "value of OpSysAndVer is %s" %ad.eval('OpSysAndVer')
-else:
-    print >> f, "no value of OpSysAndVer"
-
+print >> f, "REQUIREMENTS CAPTURED"
+if "opsys" in ad and ad.eval('opsys')=="LINUX" and\
+"opsysname" in ad and ad.eval('opsysname') == 'CentOS' and\
+"opsysmajorversion" in ad and ad.eval('opsysmajorversion') == '7':
+        print >> f, ad.eval('opsys')
+        print >> f, ad.eval('opsysname')
+        print >> f, ad.eval('opsysmajorversion')
 
 
 
