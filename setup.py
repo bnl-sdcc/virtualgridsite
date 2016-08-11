@@ -27,11 +27,18 @@ etc_condor_files = ['etc/condor/99-nova.config',]
 etc_condorce_files = ['etc/condor-ce/99-nova.config',]
 
 
+share = ['share/condor_ce_router_defaults_nova',
+         'share/nova_hook_job_cleanup',
+         'share/nova_hook_job_exit',
+         'share/nova_hook_translate_job',
+         'share/nova_hook_update_job_info',
+        ]
 
 
 rpm_data_files=[('/etc/virtualgridsite', etc_files),
                 ('/etc/condor/config.d', etc_condor_files),
                 ('/etc/condor-ce/config.d', etc_condorce_files),
+                ('/usr/share/virtualgridsite', share),
                ]
 
 
