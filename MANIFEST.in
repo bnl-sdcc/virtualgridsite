@@ -1,1 +1,7 @@
 include CHANGELOG
+include etc/*
+include etc/nova/*
+include etc/virtualgridsite/*
+include etc/condor/*
+include etc/condor-ce/*
+
