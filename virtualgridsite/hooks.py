@@ -39,9 +39,9 @@ def translate(ad):
     flavorsconf.readfp(open('/etc/virtualgridsite/flavors.conf'))
     for flavor in flavorsconf.sections():
         i_memory = flavorsconf.get(flavor,"memory")
-        i_disk = flavorsconf.get(flavor,"disk")
-        i_corecount = flavorsconf.get(flavor,"corecount")
-        flavor_classad = classad.ClassAd({"memory":i_memory,"disk":i_disk,"corecount":i_corecount})
+        i_disk = flavorsconf.get(flavor,"disksize")
+        i_corecount = flavorsconf.get(flavor,"xcount")
+        flavor_classad = classad.ClassAd({"memory":i_memory,"disksize":i_disk,"xcount":i_corecount})
         print >> f, 'flavor class ads:'
         print >> f, flavor_classad.printOld()
         check = _matches_flavor_requirements(ad, flavor_classad)
