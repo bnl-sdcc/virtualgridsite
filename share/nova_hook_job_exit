@@ -6,9 +6,10 @@ import sys
 import virtualgridsite.hooks
 
 
-#ad = classad.parseOld(sys.stdin)  #FIXME
-#                                  # input is more complex than that
-newad = virtualgridsite.hooks.exit(ad)
+#ad = classad.parseOld(sys.stdin)  
+#FIXME
+# input is more complex than that
+newad = virtualgridsite.hooks.exit()
 if newad:
     print newad.printOld()
 sys.exit(0)

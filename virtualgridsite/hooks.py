@@ -60,7 +60,7 @@ def update(ad):
     return None
 
     
-def exit(ad):
+def exit(ad=None):
     '''
     code to be invoked by the _HOOK_JOB_EXIT hook.
     ad is the job classad 
@@ -73,7 +73,7 @@ def cleanup(ad):
     code to be invoked by the _HOOK_JOB_CLEANUP hook. 
     ad is the job classad 
     '''
-    return None
+    pass
 
 
 # =============================================================================
