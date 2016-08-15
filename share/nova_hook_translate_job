@@ -1,2 +1,16 @@
 #!/usr/bin/env python 
 
+import classad
+import sys
+
+import virtualgridsite.hooks
+
+
+route_ad = classad.ClassAd(sys.stdin.readline())
+separator_line = sys.stdin.readline()
+assert separator_line == "------\n"
+ad = classad.parseOld(sys.stdin)
+newad = virtualgridsite.hooks.translate(ad)
+print newad.printOld(),
+sys.exit(0)
+
