@@ -32,7 +32,7 @@ def translate(ad):
         image_classad = classad.ClassAd({"opsys":i_opsys,"opsysname":i_opsysname,"opsysmajorversion":i_opsysmajorversion})
         print >> f, 'image class ads:'
         print >> f, image_classad.printOld()
-        check = matches_image_requirements(ad, image_classad)
+        check = _matches_image_requirements(ad, image_classad)
         print >> f, "image %s and job matches? %s" %(image, check)
     
     flavorsconf = SafeConfigParser()
@@ -44,7 +44,7 @@ def translate(ad):
         flavor_classad = classad.ClassAd({"memory":i_memory,"disk":i_disk,"corecount":i_corecount})
         print >> f, 'flavor class ads:'
         print >> f, flavor_classad.printOld()
-        check = matches_flavor_requirements(ad, flavor_classad)
+        check = _matches_flavor_requirements(ad, flavor_classad)
         print >> f, "flavor %s and job matches? %s" %(flavor, check)
 
     return ad
