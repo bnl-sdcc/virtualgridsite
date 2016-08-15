@@ -107,6 +107,7 @@ def _matches_image_requirements(job, image):
            return False
     if "opsysminorversion" in job:
         if job.get('opsysminorversion') != image.get('opsysminorversion'):
+           return False
     return True
 
 
