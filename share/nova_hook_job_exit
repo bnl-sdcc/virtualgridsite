@@ -6,9 +6,17 @@ import sys
 import virtualgridsite.hooks
 
 
-#ad = classad.parseOld(sys.stdin)  
-#FIXME
-# input is more complex than that
+stdin = sys.stdin.readlines()
+source_ad = []
+completed_ad = []
+ad = source_ad
+for line in stdin:
+    if line.startswith('------'):
+        ad = completed_ad
+    else:
+        ad.append(line)
+        
+
 newad = virtualgridsite.hooks.exit()
 if newad:
     print newad.printOld()
