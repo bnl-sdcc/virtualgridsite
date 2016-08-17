@@ -7,15 +7,19 @@ import virtualgridsite.hooks
 
 
 stdin = sys.stdin.readlines()
-source_ad = []
-completed_ad = []
-ad = source_ad
+source_ad_content = []   # containts classad from the original job
+completed_ad_content = [] # containts classad from the routed completed job
+ad = source_ad_content
 for line in stdin:
     if line.startswith('------'):
-        ad = completed_ad
+        del ad[-1] # before the ------ line there is also a \n line that needs to be removed
+        ad = completed_ad_content
     else:
         ad.append(line)
         
+source_ad = classad.parseOld( ''.join(source_ad_content) )
+completed_ad = classad.parseOld( ''.join(completed_ad_content) )
+
 
 newad = virtualgridsite.hooks.exit()
 if newad:
