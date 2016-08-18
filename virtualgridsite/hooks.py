@@ -8,48 +8,41 @@ from novissima.novacore import NovaCore
 from ConfigParser import SafeConfigParser
 
 
-def translate(ad):
+ss hook_translate(object):
     '''
+    
     code to be invoked by the _HOOK_TRANSLATE_JOB hook.
     ad is the job classad 
     '''
     
-    # QUICK & DIRTY TESTS #
-    filename = '/tmp/translate.%s' %int(time.time())
-    f = open(filename, 'w')
-    print >> f, "translate"
-    print >> f, '-----'
-    # QUICK & DIRTY TESTS #
+    def __init__(self, ad):
 
-    nova = _init_nova()
-
-    imagesconf = SafeConfigParser()
-    imagesconf.readfp(open('/etc/virtualgridsite/images.conf'))
-    for image in imagesconf.sections():
-        i_opsys = imagesconf.get(image,"opsys")
-        i_opsysname = imagesconf.get(image,"opsysname")
-        i_opsysmajorversion = imagesconf.get(image,"opsysmajorversion")
-        image_classad = classad.ClassAd({"opsys":i_opsys,"opsysname":i_opsysname,"opsysmajorversion":i_opsysmajorversion})
-        print >> f, 'image class ads:'
-        print >> f, image_classad.printOld()
-        check = _matches_image_requirements(ad, image_classad)
-        print >> f, "image %s and job matches? %s" %(image, check)
-    
-    flavorsconf = SafeConfigParser()
-    flavorsconf.readfp(open('/etc/virtualgridsite/flavors.conf'))
-    for flavor in flavorsconf.sections():
-        f_memory = flavorsconf.get(flavor,"memory")
-        f_disk = flavorsconf.get(flavor,"disksize")
-        f_corecount = flavorsconf.get(flavor,"xcount")
-        flavor_classad = classad.ClassAd({"memory":f_memory,"disksize":f_disk,"xcount":f_corecount})
-        print >> f, 'flavor class ads:'
-        print >> f, flavor_classad.printOld()
-        check = _matches_flavor_requirements(ad, flavor_classad)
-        print >> f, "flavor %s and job matches? %s" %(flavor, check)
-
-    return ad
+        self.ad = ad
 
 
+    def run(self):
+
+        nova = _init_nova()
+
+        imagesconf = SafeConfigParser()
+        imagesconf.readfp(open('/etc/virtualgridsite/images.conf'))
+        for image in imagesconf.sections():
+            i_opsys = imagesconf.get(image,"opsys")
+            i_opsysname = imagesconf.get(image,"opsysname")
+            i_opsysmajorversion = imagesconf.get(image,"opsysmajorversion")
+            image_classad = classad.ClassAd({"opsys":i_opsys,"opsysname":i_opsysname,"opsysmajorversion":i_opsysmajorversion})
+            check = _matches_image_requirements(self.ad, image_classad)
+
+        flavorsconf = SafeConfigParser()
+        flavorsconf.readfp(open('/etc/virtualgridsite/flavors.conf'))
+        for flavor in flavorsconf.sections():
+            i_memory = flavorsconf.get(flavor,"memory")
+            i_disk = flavorsconf.get(flavor,"disksize")
+            i_corecount = flavorsconf.get(flavor,"xcount")
+            flavor_classad = classad.ClassAd({"memory":i_memory,"disksize":i_disk,"xcount":i_corecount})
+            check = _matches_flavor_requirements(self.ad, flavor_classad)
+
+        return self.ad
 
 
 def update(ad):
