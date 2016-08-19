@@ -7,9 +7,9 @@ import time
 import virtualgridsite.hooks
 
 ad = classad.parseOld(sys.stdin)
-newad = virtualgridsite.hooks.update(ad)
+hook_update = virtualgridsite.hooks.hook_update(ad)
+newad = hook_update.run()
 if newad:
     print newad.printOld()
 sys.exit(0)
-
 

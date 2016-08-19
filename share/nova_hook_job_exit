@@ -5,16 +5,13 @@ import sys
 
 import virtualgridsite.hooks
 
-incontent = sys.stdin.read()
-ads = incontent.split('\n------\n')
-# documentation on the input for this HOOK:
-#       The source job ClassAd, 
-#       followed by the routed copy Classad that completed, 
-#       separated by the string "------" and a new line.
-source_ad = classad.parseOld(ads[0])
-completed_ad = classad.parseOld(ads[1])
+#content = sys.stdin.read()
+#ads = content.split('\n------\n')
+#ad1 = classad.parseOld( ads[0] )
+#ad2 = classad.parseOld( ads[1] )
 
-newad = virtualgridsite.hooks.exit()
+hook_exit = virtualgridsite.hooks.hook_exit()
+newad = hook_exit.run()
 if newad:
     print newad.printOld()
 sys.exit(0)
