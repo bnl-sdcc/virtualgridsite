@@ -65,7 +65,16 @@ class hook_translate(hook_base):
             check = self._matches_flavor_requirements(flavor_classad)
             self.log.info('flavor %s and job match? %s' %(flavor, check))
 
+        self._build_requirements()
+
         return self.ad
+
+
+    def _build_requirements(self):
+
+        self.log.info('building Requirements expression')
+        self.ad['Requirements'] = classad.ExprTree( '( Target.OpSys == "%s" ) && (Target.OpSysName == "%s") && (Target.OpSysMajorVer == %s)'  %(self.ad.get('opsys'), self.ad.get('opsysname'), self.ad.get('opsysmajorversion')) )
+        self.log.info('Requirements expression built')
 
 
     def _matches_image_requirements(self, image):
