@@ -10,9 +10,12 @@ import virtualgridsite.hooks
 #ad1 = classad.parseOld( ads[0] )
 #ad2 = classad.parseOld( ads[1] )
 
-hook_exit = virtualgridsite.hooks.hook_exit()
-newad = hook_exit.run()
-if newad:
-    print newad.printOld()
-sys.exit(0)
+try:
+    hook_exit = virtualgridsite.hooks.hook_exit()
+    newad = hook_exit.run()
+    if newad:
+        print newad.printOld()
+    sys.exit(0)
+except Exception, ex:
+    sys.exit(-1)
 

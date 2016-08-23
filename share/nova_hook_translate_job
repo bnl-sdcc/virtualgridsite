@@ -10,8 +10,11 @@ route_ad = classad.ClassAd(sys.stdin.readline())
 separator_line = sys.stdin.readline()
 assert separator_line == "------\n"
 ad = classad.parseOld(sys.stdin)
-hook_translate = virtualgridsite.hooks.hook_translate(ad)
-newad = hook_translate.run()
-print newad.printOld(),
-sys.exit(0)
+try:
+    hook_translate = virtualgridsite.hooks.hook_translate(ad)
+    newad = hook_translate.run()
+    print newad.printOld(),
+    sys.exit(0)
+except Exception, ex:
+    sys.exit(-1)
 

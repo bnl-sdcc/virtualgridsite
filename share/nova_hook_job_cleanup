@@ -7,8 +7,10 @@ import time
 import virtualgridsite.hooks
 
 ad = classad.parseOld(sys.stdin)
-hook_cleanup = virtualgridsite.hooks.hook_cleanup(ad)
-hook_cleanup.run()
-sys.exit(0)
-
+try:
+    hook_cleanup = virtualgridsite.hooks.hook_cleanup(ad)
+    hook_cleanup.run()
+    sys.exit(0)
+except Exception, ex:
+    sys.exit(-1)
 
