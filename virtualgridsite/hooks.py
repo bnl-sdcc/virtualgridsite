@@ -43,7 +43,7 @@ class hook_translate(hook_base):
 
         self.log.info('input class ad:\n%s' %self.ad)
 
-        nova = _init_nova()
+        self.nova = _init_nova()
 
         self._choose_vm()
 
