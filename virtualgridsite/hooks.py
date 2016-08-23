@@ -1,8 +1,10 @@
 #!/usr/bin/env python 
 
-import time
-import sys
 import classad
+import getpass
+import logging
+import sys
+import time
 
 from novissima.novacore import NovaCore
 from ConfigParser import SafeConfigParser
@@ -43,6 +45,15 @@ class hook_translate(hook_base):
 
         nova = _init_nova()
 
+        self._choose_vm()
+
+        self._build_requirements()
+
+        return self.ad
+
+
+    def _choose_vm(self):
+
         imagesconf = SafeConfigParser()
         imagesconf.readfp(open('/etc/virtualgridsite/images.conf'))
         for image in imagesconf.sections():
@@ -64,10 +75,6 @@ class hook_translate(hook_base):
             self.log.info('flavor class ad:\n %s' %flavor_classad.printOld())
             check = self._matches_flavor_requirements(flavor_classad)
             self.log.info('flavor %s and job match? %s' %(flavor, check))
-
-        self._build_requirements()
-
-        return self.ad
 
 
     def _build_requirements(self):
