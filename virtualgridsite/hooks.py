@@ -71,10 +71,26 @@ class hook_translate(hook_base):
 
 
     def _build_requirements(self):
-
+        """
+        builds the classad Requirements based on original job classads
+        """
         self.log.info('building Requirements expression')
-        self.ad['Requirements'] = classad.ExprTree( '( Target.OpSys == "%s" ) && (Target.OpSysName == "%s") && (Target.OpSysMajorVer == %s)'  %(self.ad.get('opsys'), self.ad.get('opsysname'), self.ad.get('opsysmajorversion')) )
-        self.log.info('Requirements expression built')
+
+        reqs = []
+        if 'opsys' in self.ad:
+            reqs.append( '( Target.OpSys == "%s")' %self.ad.get('opsys'))
+        if 'opsysname' in self.ad:
+            reqs.append( '( Target.OpSysName == "%s")' %self.ad.get('opsysname'))
+        if 'opsysmajorversion' in self.ad:
+            reqs.append( '( Target.OpSysMajorVer == %s)' %self.ad.get('opsysmajorversion'))
+
+        if reqs:
+            req = classad.ExprTree(' && '.join(reqs))
+            self.ad['Requirements'] = req
+            self.log.info('Requirements expression built as %s' %req)
+        else:
+            self.log.info('no Requirements expression built')
+            
 
 
     def _matches_image_requirements(self, image):
