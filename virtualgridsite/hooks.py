@@ -14,6 +14,7 @@ class hook_base(object):
     def __init__(self, ad=None):
         self.ad = ad
         self._setlogging()
+        self.nova = _init_nova()
 
     def _setlogging(self):
 
@@ -43,9 +44,9 @@ class hook_translate(hook_base):
 
         self.log.info('input class ad:\n%s' %self.ad)
 
-        self.nova = _init_nova()
-
         self._choose_vm()
+
+        self._boot_os_server()
 
         self._build_requirements()
 
@@ -75,6 +76,20 @@ class hook_translate(hook_base):
             self.log.info('flavor class ad:\n %s' %flavor_classad.printOld())
             check = self._matches_flavor_requirements(flavor_classad)
             self.log.info('flavor %s and job match? %s' %(flavor, check))
+
+
+    # FIXME!
+    # for now, the names of image & flavor are hardcoded
+    def _boot_os_server(self):
+
+        self.log.info('init boot_os_server')
+        image = self.nova.get_image('centos7-bare-cloud')
+        self.log.info('image found = %s' %image.name)
+        flavor = self.nova.get_flavor('m1.medium')
+        self.log.info('flavor found = %s' %flavor.name)
+        self.nova.create_server('centos7-bare-cloud-caballer-20160823', image, flavor)
+        self.log.info('end boot_os_server')
+        self.ad['virtualgridsite_os_servername'] = 'centos7-bare-cloud-caballer-20160823'
 
 
     def _build_requirements(self):
@@ -178,7 +193,15 @@ class hook_cleanup(hook_base):
         self.log = logging.getLogger('cleanup')
 
     def run(self):
+        self.log.debug("begin")
         self.log.info('input class ad:\n%s' %self.ad)
+        if 'virtualgridsite_os_servername' in self.ad:
+            servername = self.ad['virtualgridsite_os_servername']
+            self.log.info('classad includes virtualgridsite_os_servername %s' %servername)
+            self.log.info('deleting OpenStack server %s' %servername)
+            server = self.nova.get_server(servername)
+            self.nova.delete_server(server)
+
 
 
 # =============================================================================
