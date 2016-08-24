@@ -16,6 +16,9 @@ class hook_base(object):
         self.username = getpass.getuser()
         self._setlogging()
         self.nova = _init_nova()
+        self.conf = SafeConfigParser()
+        self.conf.readfp( open('/etc/virtualgridsite/virtualgridsite.conf') )
+
 
     def _setlogging(self):
 
@@ -44,13 +47,40 @@ class hook_translate(hook_base):
 
         self.log.info('input class ad:\n%s' %self.ad)
 
-        self._choose_vm()
-
-        self._boot_os_server()
-
-        self._build_requirements()
+        requires = self._requires_vm()
+        self.log.info('_requires_vm() returned %s' %requires)
+        if requires:
+            self._choose_vm()
+            self._boot_os_server()
+            self._build_requirements()
 
         return self.ad
+
+
+   def _requires_vm(self):
+        '''
+        decides if booting a VM server in OpenStack is needed or not
+        '''
+        
+        if self.conf.getboolean('VIRTUALGRIDSITE', 'always_vm'):
+            return True
+        # FIXME
+        # this can be done probably with self.ad.get('foo')
+        if 'opsys' in self.ad and self.ad['opsys'] != self.conf.get('VIRTUALGRIDSITE', 'farm_opsys'):
+            return True
+        if 'opsysname' in self.ad and self.ad['opsysname'] != self.conf.get('VIRTUALGRIDSITE', 'farm_opsysname'):
+            return True
+        if 'opsysmajorversion' in self.ad and self.ad['opsysmajorversion'] != self.conf.get('VIRTUALGRIDSITE', 'farm_opsysmajorversion'):
+            return True
+
+        if 'virtualgridsite_imageid' in self.ad:
+            return True
+
+        if 'virtualgridsite_url' in self.ad:
+            return True
+
+        # if no reason to boot a VM...
+        return False
 
 
     def _choose_vm(self):

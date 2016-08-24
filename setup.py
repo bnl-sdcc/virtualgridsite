@@ -22,6 +22,7 @@ release_version = core.__version__
 etc_files = ['etc/nova/nova.conf',
              'etc/virtualgridsite/images.conf',
              'etc/virtualgridsite/flavors.conf',
+             'etc/virtualgridsite/virtualgridsite.conf',
             ]
 #etc_condor_files = ['etc/condor/99-nova.config',]
 etc_condorce_files = ['etc/condor-ce/99-nova.config',]
