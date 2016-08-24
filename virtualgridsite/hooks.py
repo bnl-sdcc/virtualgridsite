@@ -13,6 +13,7 @@ class hook_base(object):
 
     def __init__(self, ad=None):
         self.ad = ad
+        self.username = getpass.getuser()
         self._setlogging()
         self.nova = _init_nova()
 
@@ -20,8 +21,7 @@ class hook_base(object):
 
         self.log = logging.getLogger()
 
-        username = getpass.getuser()
-        logfilename = '/var/log/virtualgridsite/hooks.%s.log' %username
+        logfilename = '/var/log/virtualgridsite/hooks.%s.log' %self.username
         logStream = logging.FileHandler(logfilename)
         FORMAT='%(asctime)s (UTC) [ %(levelname)s ] %(name)s %(filename)s:%(lineno)d %(funcName)s(): %(message)s'
         formatter = logging.Formatter(FORMAT)
@@ -64,7 +64,10 @@ class hook_translate(hook_base):
             image_classad = classad.ClassAd({"opsys":i_opsys,"opsysname":i_opsysname,"opsysmajorversion":i_opsysmajorversion})
             self.log.info('image class ad:\n %s' %image_classad.printOld())
             check = self._matches_image_requirements(image_classad)
-            self.log.info('image %s and job match? %s' %(image, check))
+            if check:
+                self.log.info('image %s and job match? %s' %(image, check))
+                self.image_name = imagesconf.get(image, "name")
+                self.log.info('image found: %s' %self.image_name)
 
         flavorsconf = SafeConfigParser()
         flavorsconf.readfp(open('/etc/virtualgridsite/flavors.conf'))
@@ -75,7 +78,11 @@ class hook_translate(hook_base):
             flavor_classad = classad.ClassAd({"memory":i_memory,"disksize":i_disk,"xcount":i_corecount})
             self.log.info('flavor class ad:\n %s' %flavor_classad.printOld())
             check = self._matches_flavor_requirements(flavor_classad)
-            self.log.info('flavor %s and job match? %s' %(flavor, check))
+            if check:
+                self.log.info('flavor %s and job match? %s' %(flavor, check))
+                self.flavor_name = flavorsconf.get(flavor, "name")
+                self.log.info('flavor found: %s' %self.flavor_name)
+
 
 
     # FIXME!
@@ -83,13 +90,10 @@ class hook_translate(hook_base):
     def _boot_os_server(self):
 
         self.log.info('init boot_os_server')
-        image = self.nova.get_image('centos7-bare-cloud')
-        self.log.info('image found = %s' %image.name)
-        flavor = self.nova.get_flavor('m1.medium')
-        self.log.info('flavor found = %s' %flavor.name)
-        self.nova.create_server('centos7-bare-cloud-caballer-20160823', image, flavor)
+        server_name = '%s-%s-%s' %(self.image_name, self.username, time.strftime("%Y%m%d%H%M%S"))
+        self.nova.create_server(server_name, self.image_name, self.flavor_name)        
         self.log.info('end boot_os_server')
-        self.ad['virtualgridsite_os_servername'] = 'centos7-bare-cloud-caballer-20160823'
+        self.ad['virtualgridsite_os_servername'] = server_name 
 
 
     def _build_requirements(self):
