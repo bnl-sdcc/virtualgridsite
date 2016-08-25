@@ -85,6 +85,19 @@ class hook_translate(hook_base):
 
     def _choose_vm(self):
 
+        self.image_name = self._choose_image()
+        self.flavor_name = self._choose_flavor()
+        self.log.info('found image name = %s and flavor name = %s' %(self.image_name, self.flavor_name))
+        if not self.image_name:
+            self.log.critical('no image found. Aborting')
+            raise Exception
+        if not self.flavor_name:
+            self.log.critical('no flavor found. Aborting')
+            raise Exception
+
+
+    def _choose_image(self):
+
         imagesconf = SafeConfigParser()
         imagesconf.readfp(open('/etc/virtualgridsite/images.conf'))
         for image in imagesconf.sections():
@@ -96,8 +109,13 @@ class hook_translate(hook_base):
             check = self._matches_image_requirements(image_classad)
             if check:
                 self.log.info('image %s and job match? %s' %(image, check))
-                self.image_name = imagesconf.get(image, "name")
-                self.log.info('image found: %s' %self.image_name)
+                image_name = imagesconf.get(image, "name")
+                self.log.info('image found: %s' %image_name)
+                return image_name
+        # if nothing found...
+        return None
+
+    def _choose_flavor(self):
 
         flavorsconf = SafeConfigParser()
         flavorsconf.readfp(open('/etc/virtualgridsite/flavors.conf'))
@@ -110,8 +128,12 @@ class hook_translate(hook_base):
             check = self._matches_flavor_requirements(flavor_classad)
             if check:
                 self.log.info('flavor %s and job match? %s' %(flavor, check))
-                self.flavor_name = flavorsconf.get(flavor, "name")
-                self.log.info('flavor found: %s' %self.flavor_name)
+                flavor_name = flavorsconf.get(flavor, "name")
+                self.log.info('flavor found: %s' %flavor_name)
+                return flavor_name
+        # if nothing found...
+        return None
+
 
 
 
