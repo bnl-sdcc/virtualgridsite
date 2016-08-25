@@ -45,7 +45,7 @@ class hook_translate(hook_base):
 
     def run(self):
 
-        self.log.info('input class ad:\n%s' %self.ad)
+        self.log.debug('input class ad:\n%s' %self.ad)
 
         requires = self._requires_vm()
         self.log.info('_requires_vm() returned %s' %requires)
@@ -199,7 +199,7 @@ class hook_update(hook_base):
 
     def run(self):
 
-        self.log.info('input class ad:\n%s' %self.ad)
+        self.log.debug('input class ad:\n%s' %self.ad)
         return None
 
 
@@ -228,7 +228,7 @@ class hook_cleanup(hook_base):
 
     def run(self):
         self.log.debug("begin")
-        self.log.info('input class ad:\n%s' %self.ad)
+        self.log.debug('input class ad:\n%s' %self.ad)
         if 'virtualgridsite_os_servername' in self.ad:
             servername = self.ad['virtualgridsite_os_servername']
             self.log.info('classad includes virtualgridsite_os_servername %s' %servername)
