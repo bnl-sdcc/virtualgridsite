@@ -66,11 +66,11 @@ class hook_translate(hook_base):
             return True
         # FIXME
         # this can be done probably with self.ad.get('foo')
-        if 'opsys' in self.ad and self.ad['opsys'] != self.conf.get('VIRTUALGRIDSITE', 'farm_opsys'):
+        if 'opsys' in self.ad and self.conf.has_option('VIRTUALGRIDSITE','farm_opsys') and self.ad['opsys'] != self.conf.get('VIRTUALGRIDSITE', 'farm_opsys'):
             return True
-        if 'opsysname' in self.ad and self.ad['opsysname'] != self.conf.get('VIRTUALGRIDSITE', 'farm_opsysname'):
+        if 'opsysname' in self.ad and self.conf.has_option('VIRTUALGRIDSITE','farm_opsysname') and self.ad['opsysname'] != self.conf.get('VIRTUALGRIDSITE', 'farm_opsysname'):
             return True
-        if 'opsysmajorversion' in self.ad and self.ad['opsysmajorversion'] != self.conf.get('VIRTUALGRIDSITE', 'farm_opsysmajorversion'):
+        if 'opsysmajorversion' in self.ad and self.conf.has_option('VIRTUALGRIDSITE','farm_opsysmajorversion') and self.ad['opsysmajorversion'] != self.conf.get('VIRTUALGRIDSITE', 'farm_opsysmajorversion'):
             return True
 
         if 'virtualgridsite_imageid' in self.ad:
