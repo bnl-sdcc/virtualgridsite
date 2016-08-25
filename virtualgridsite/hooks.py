@@ -73,7 +73,7 @@ class hook_translate(hook_base):
         if 'opsysmajorversion' in self.ad and self.conf.has_option('VIRTUALGRIDSITE','farm_opsysmajorversion') and self.ad['opsysmajorversion'] != self.conf.get('VIRTUALGRIDSITE', 'farm_opsysmajorversion'):
             return True
 
-        if 'virtualgridsite_imageid' in self.ad:
+        if 'virtualgridsite_imagename' in self.ad:
             return True
 
         if 'virtualgridsite_url' in self.ad:
@@ -98,6 +98,11 @@ class hook_translate(hook_base):
 
     def _choose_image(self):
 
+        if 'virtualgridsite_image_name' in self.ad:
+            image_name = self.ad['virtualgridsite_image_name']
+            self.log.info('using image name passed as classad: %s' %image_name)
+            return image_name
+
         imagesconf = SafeConfigParser()
         imagesconf.readfp(open('/etc/virtualgridsite/images.conf'))
         for image in imagesconf.sections():
@@ -115,7 +120,14 @@ class hook_translate(hook_base):
         # if nothing found...
         return None
 
+
     def _choose_flavor(self):
+
+        if 'virtualgridsite_flavor_name' in self.ad:
+            flavor_name = self.ad['virtualgridsite_flavor_name']
+            self.log.info('using flavor name passed as classad: %s' %flavor_name)
+            return flavor_name
+
 
         flavorsconf = SafeConfigParser()
         flavorsconf.readfp(open('/etc/virtualgridsite/flavors.conf'))
