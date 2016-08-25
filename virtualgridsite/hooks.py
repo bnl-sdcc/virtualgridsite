@@ -143,7 +143,11 @@ class hook_translate(hook_base):
 
         self.log.info('init boot_os_server')
         server_name = '%s-%s-%s' %(self.image_name, self.username, time.strftime("%Y%m%d%H%M%S"))
-        self.nova.create_server(server_name, self.image_name, self.flavor_name)        
+        try:
+            self.nova.create_server(server_name, self.image_name, self.flavor_name)        
+        except Exception, ex:
+            self.log.critical('booting VM server failed. Aborting')
+            raise Exception
         self.log.info('end boot_os_server')
         self.ad['virtualgridsite_os_servername'] = server_name 
 
