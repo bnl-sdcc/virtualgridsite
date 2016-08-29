@@ -105,17 +105,18 @@ class hook_translate(hook_base):
     def _choose_vm(self):
 
         self.image = self._choose_image()
-        self.flavor_name = self._choose_flavor()
-        if not self.image_name:
+        if not self.image:
             self.log.critical('no image found. Aborting')
             raise Exception
         else:
             self.log.info('found image name = %s ' %self.image.name)
-        if not self.flavor_name:
+
+        self.flavor = self._choose_flavor()
+        if not self.flavor:
             self.log.critical('no flavor found. Aborting')
             raise Exception
         else:
-            self.log.info('found flavor name = %s' %self.flavor_name)
+            self.log.info('found flavor name = %s' %self.flavor.name)
 
 
     def _choose_image(self):
@@ -137,8 +138,8 @@ class hook_translate(hook_base):
             self.log.info('image class ad:\n %s' %image_classad.printOld())
             check = self._matches_image_requirements(image_classad)
             if check:
-                self.log.info('image %s and job match? %s' %(image, check))
-                image_name = imagesconf.get(image, "name")
+                self.log.info('image %s and job match? %s' %(sect, check))
+                image_name = imagesconf.get(sect, "name")
                 self.log.info('image found: %s' %image_name)
 
                 image = Image()
@@ -157,23 +158,32 @@ class hook_translate(hook_base):
         if 'virtualgridsite_flavor_name' in self.ad:
             flavor_name = self.ad['virtualgridsite_flavor_name']
             self.log.info('using flavor name passed as classad: %s' %flavor_name)
-            return flavor_name
+            flavor = Flavor()
+            flavor.name = flavor_name
+            return flavor
 
 
         flavorsconf = SafeConfigParser()
         flavorsconf.readfp(open('/etc/virtualgridsite/flavors.conf'))
-        for flavor in flavorsconf.sections():
-            i_memory = flavorsconf.get(flavor,"memory")
-            i_disk = flavorsconf.get(flavor,"disksize")
-            i_corecount = flavorsconf.get(flavor,"xcount")
+        for sect in flavorsconf.sections():
+            i_memory = flavorsconf.get(sect,"memory")
+            i_disk = flavorsconf.get(sect,"disksize")
+            i_corecount = flavorsconf.get(sect,"xcount")
             flavor_classad = classad.ClassAd({"memory":i_memory,"disksize":i_disk,"xcount":i_corecount})
             self.log.info('flavor class ad:\n %s' %flavor_classad.printOld())
             check = self._matches_flavor_requirements(flavor_classad)
             if check:
-                self.log.info('flavor %s and job match? %s' %(flavor, check))
-                flavor_name = flavorsconf.get(flavor, "name")
+                self.log.info('flavor %s and job match? %s' %(sect, check))
+                flavor_name = flavorsconf.get(sect, "name")
                 self.log.info('flavor found: %s' %flavor_name)
-                return flavor_name
+                flavor = Flavor()
+                flavor.name = flavor_name
+                flavor.memory = i_memory
+                flavor.xcount = i_corecount
+                flavor.disksize = i_disk
+                return flavor
+
+
         # if nothing found...
         return None
 
@@ -186,9 +196,9 @@ class hook_translate(hook_base):
 
         self.log.info('init boot_os_server')
         server_name = '%s-%s-%s' %(self.image.name, self.username, time.strftime("%Y%m%d%H%M%S"))
-        self.log.info('booting VM server with server name = %s, image name = %s, flavor name = %s' %(server_name, self.image.name, self.flavor_name))
+        self.log.info('booting VM server with server name = %s, image name = %s, flavor name = %s' %(server_name, self.image.name, self.flavor.name))
         try:
-            self.nova.create_server(server_name, self.image.name, self.flavor_name)        
+            self.nova.create_server(server_name, self.image.name, self.flavor.name)        
         except Exception, ex:
             self.log.critical('booting VM server failed. Aborting')
             raise Exception
