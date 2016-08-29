@@ -7,6 +7,7 @@ import sys
 import time
 
 from novissima.novacore import NovaCore
+from novissima.glancecore import GlanceCore
 from ConfigParser import SafeConfigParser
 
 class hook_base(object):
