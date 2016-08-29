@@ -73,7 +73,7 @@ class hook_translate(hook_base):
         if 'opsysmajorversion' in self.ad and self.conf.has_option('VIRTUALGRIDSITE','farm_opsysmajorversion') and self.ad['opsysmajorversion'] != self.conf.get('VIRTUALGRIDSITE', 'farm_opsysmajorversion'):
             return True
 
-        if 'virtualgridsite_imagename' in self.ad:
+        if 'virtualgridsite_image_name' in self.ad:
             return True
 
         if 'virtualgridsite_url' in self.ad:
