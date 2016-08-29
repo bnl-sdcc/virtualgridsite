@@ -12,5 +12,8 @@ try:
     hook_cleanup.run()
     sys.exit(0)
 except Exception, ex:
-    sys.exit(-1)
+    # FIXME
+    # for now, we do not return RC != 0
+    # since that does not make HTCondor to cancel the job
+    sys.exit(0)
 
