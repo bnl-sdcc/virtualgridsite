@@ -10,6 +10,23 @@ from novissima.novacore import NovaCore
 from novissima.glancecore import GlanceCore
 from ConfigParser import SafeConfigParser
 
+
+class Image(object):
+    def __init__(self):
+        self.name = None
+        self.ami = None
+        self.opsys = None
+        self.opsysname = None
+        self.opsysmajorversion = None
+
+class Flavor(object):
+    def __init__(self):
+        self.name = None
+        self.memory = None
+        self.xcount = None
+        self.disksize = None
+
+
 class hook_base(object):
 
     def __init__(self, ad=None):
@@ -87,15 +104,18 @@ class hook_translate(hook_base):
 
     def _choose_vm(self):
 
-        self.image_name = self._choose_image()
+        self.image = self._choose_image()
         self.flavor_name = self._choose_flavor()
-        self.log.info('found image name = %s and flavor name = %s' %(self.image_name, self.flavor_name))
         if not self.image_name:
             self.log.critical('no image found. Aborting')
             raise Exception
+        else:
+            self.log.info('found image name = %s ' %self.image.name)
         if not self.flavor_name:
             self.log.critical('no flavor found. Aborting')
             raise Exception
+        else:
+            self.log.info('found flavor name = %s' %self.flavor_name)
 
 
     def _choose_image(self):
@@ -103,14 +123,16 @@ class hook_translate(hook_base):
         if 'virtualgridsite_image_name' in self.ad:
             image_name = self.ad['virtualgridsite_image_name']
             self.log.info('using image name passed as classad: %s' %image_name)
-            return image_name
+            image = Image()
+            image.name = image_name
+            return image
 
         imagesconf = SafeConfigParser()
         imagesconf.readfp(open('/etc/virtualgridsite/images.conf'))
-        for image in imagesconf.sections():
-            i_opsys = imagesconf.get(image,"opsys")
-            i_opsysname = imagesconf.get(image,"opsysname")
-            i_opsysmajorversion = imagesconf.get(image,"opsysmajorversion")
+        for sect in imagesconf.sections():
+            i_opsys = imagesconf.get(sect,"opsys")
+            i_opsysname = imagesconf.get(sect,"opsysname")
+            i_opsysmajorversion = imagesconf.get(sect,"opsysmajorversion")
             image_classad = classad.ClassAd({"opsys":i_opsys,"opsysname":i_opsysname,"opsysmajorversion":i_opsysmajorversion})
             self.log.info('image class ad:\n %s' %image_classad.printOld())
             check = self._matches_image_requirements(image_classad)
@@ -118,7 +140,14 @@ class hook_translate(hook_base):
                 self.log.info('image %s and job match? %s' %(image, check))
                 image_name = imagesconf.get(image, "name")
                 self.log.info('image found: %s' %image_name)
-                return image_name
+
+                image = Image()
+                image.name = image_name
+                image.opsys = i_opsys
+                image.opsysname = i_opsysname
+                image.opsysmajorversion = i_opsysmajorversion
+                return image
+                
         # if nothing found...
         return None
 
@@ -156,9 +185,10 @@ class hook_translate(hook_base):
     def _boot_os_server(self):
 
         self.log.info('init boot_os_server')
-        server_name = '%s-%s-%s' %(self.image_name, self.username, time.strftime("%Y%m%d%H%M%S"))
+        server_name = '%s-%s-%s' %(self.image.name, self.username, time.strftime("%Y%m%d%H%M%S"))
+        self.log.info('booting VM server with server name = %s, image name = %s, flavor name = %s' %(server_name, self.image.name, self.flavor_name))
         try:
-            self.nova.create_server(server_name, self.image_name, self.flavor_name)        
+            self.nova.create_server(server_name, self.image.name, self.flavor_name)        
         except Exception, ex:
             self.log.critical('booting VM server failed. Aborting')
             raise Exception
