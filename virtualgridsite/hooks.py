@@ -16,6 +16,7 @@ class hook_base(object):
         self.username = getpass.getuser()
         self._setlogging()
         self.nova = _init_nova()
+        self.glance = _init_glance()
         self.conf = SafeConfigParser()
         self.conf.readfp( open('/etc/virtualgridsite/virtualgridsite.conf') )
 
@@ -226,6 +227,14 @@ class hook_translate(hook_base):
         return True
 
 
+    def _create_image(self, filename, image_name):
+        '''
+        uploads a VM image into glance
+        '''
+        self.glance.create_image(filename, image_name)
+
+
+
 class hook_update(hook_base):
     '''
     code to be invoked by the _HOOK_UPDATE_JOB_INFO hook. 
@@ -278,6 +287,8 @@ class hook_cleanup(hook_base):
 
 # =============================================================================
 
+# FIXME
+# too much duplicated code here !!
 def _init_nova():
     c = SafeConfigParser()
     c.readfp(open('/etc/virtualgridsite/nova.conf'))
@@ -289,6 +300,16 @@ def _init_nova():
     nova = NovaCore(VERSION, USERNAME, PASSWORD, TENANT, URL)
     return nova
 
+def _init_glance():
+    c = SafeConfigParser()
+    c.readfp(open('/etc/virtualgridsite/nova.conf'))
+    VERSION = c.get('NOVA', 'VERSION')
+    USERNAME = c.get('NOVA', 'OS_USERNAME')
+    PASSWORD = c.get('NOVA', 'OS_PASSWORD')
+    TENANT = c.get('NOVA', 'OS_TENANT_NAME')
+    URL = c.get('NOVA', 'OS_AUTH_URL')
+    glance = GlanceCore(USERNAME, PASSWORD, TENANT, URL)
+    return glance
 
 
 
