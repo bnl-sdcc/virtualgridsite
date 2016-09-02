@@ -195,7 +195,7 @@ class hook_translate(hook_base):
     def _boot_os_server(self):
 
         self.log.info('init boot_os_server')
-        server_name = '%s-%s-%s' %(self.image.name, self.username, time.strftime("%Y%m%d%H%M%S"))
+        server_name = self.ad['GlobalJobId']
         self.log.info('booting VM server with server name = %s, image name = %s, flavor name = %s' %(server_name, self.image.name, self.flavor.name))
         try:
             self.nova.create_server(server_name, self.image.name, self.flavor.name)        
