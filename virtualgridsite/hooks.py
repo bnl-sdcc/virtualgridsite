@@ -121,6 +121,20 @@ class hook_translate(hook_base):
 
     def _choose_image(self):
 
+       if 'virtualgridsite_image_url' in self.ad:
+            self.log.info('detected classad virtualgridsite_image_url. Uploading image to glance')
+            # 1. check the URL and download the image
+            # 2. upload to glance
+            image_name = 'fake-image-for-test'  # this should be the md5sum of the URL
+            # 3. upload to glance
+            self._create_image('/home/slot1/image.iso', image_name)
+            self.log.info('image uploaded to glance')
+
+            image = Image()
+            image.name = image_name
+            return image
+
+
         if 'virtualgridsite_image_name' in self.ad:
             image_name = self.ad['virtualgridsite_image_name']
             self.log.info('using image name passed as classad: %s' %image_name)
