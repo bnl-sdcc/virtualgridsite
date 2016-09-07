@@ -1,10 +1,15 @@
 #!/usr/bin/env python 
 
 import classad
+import datetime
 import getpass
+import hashlib
 import logging
+import os
 import sys
 import time
+import urllib
+import urllib2
 
 from novissima.novacore import NovaCore
 from novissima.glancecore import GlanceCore
@@ -122,13 +127,32 @@ class hook_translate(hook_base):
     def _choose_image(self):
 
        if 'virtualgridsite_image_url' in self.ad:
-            self.log.info('detected classad virtualgridsite_image_url. Uploading image to glance')
-            # 1. check the URL and download the image
-            # 2. upload to glance
-            image_name = 'fake-image-for-test'  # this should be the md5sum of the URL
-            # 3. upload to glance
-            self._create_image('/home/slot1/image.iso', image_name)
-            self.log.info('image uploaded to glance')
+            # 1. check the URL 
+            url = self.ad['virtualgridsite_image_url']
+            self.log.info('detected classad virtualgridsite_image_url %s' %url)
+            url_date = urllib2.urlopen(url).info()['last-modified']
+            self.log.info('last modified = %s' %url_date)
+            # FIXME: 
+            #   what if the HTTP headers do not have field "last-modified"? 
+            #   What if the format of the date is different?
+            image_name = '%s-%s' %(hashlib.md5(url).hexdigest(), datetime.datetime.strptime(url_date, "%a, %d %b %Y %H:%M:%S %Z").strftime('%s') )
+            
+            # check if already in glnace
+            try:
+                check = self.glance.get_image(image_name)
+                self.log.info('the image %s is already in glance' %image_name)
+            except:
+                self.log.info('the image %s is not yet glance' %image_name)
+                # download the image
+                fimage = '%s/images/%s' %(os.path.expanduser("~"), image_name)
+                # FIXME
+                #   timeout? 
+                #   re-trials? 
+                #   what to do if the download fails?
+                urllib.urlretrieve(url, fimage) 
+                # upload to glance 
+                self._create_image(fimage, image_name)
+                self.log.info('image uploaded to glance')
 
             image = Image()
             image.name = image_name
