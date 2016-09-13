@@ -75,8 +75,11 @@ class hook_translate(hook_base):
         self.log.info('_requires_vm() returned %s' %requires)
         if requires:
             self._choose_vm()
-            self._boot_os_server()
-            self._build_requirements()
+            if 'virtualgridsite_interactive_vm' in self.ad:
+                self._set_interactive()
+            else:
+                self._boot_os_server()
+                self._build_requirements()
 
         return self.ad
 
@@ -175,6 +178,7 @@ class hook_translate(hook_base):
             i_opsys = imagesconf.get(sect,"opsys")
             i_opsysname = imagesconf.get(sect,"opsysname")
             i_opsysmajorversion = imagesconf.get(sect,"opsysmajorversion")
+            i_ami = imagesconf.get(sect, "ami")
             image_classad = classad.ClassAd({"opsys":i_opsys,"opsysname":i_opsysname,"opsysmajorversion":i_opsysmajorversion})
             self.log.info('image class ad:\n %s' %image_classad.printOld())
             check = self._matches_image_requirements(image_classad)
@@ -188,6 +192,7 @@ class hook_translate(hook_base):
                 image.opsys = i_opsys
                 image.opsysname = i_opsysname
                 image.opsysmajorversion = i_opsysmajorversion
+                image.ami = i_ami
                 return image
                 
         # if nothing found...
@@ -210,7 +215,7 @@ class hook_translate(hook_base):
             i_memory = flavorsconf.get(sect,"memory")
             i_disk = flavorsconf.get(sect,"disksize")
             i_corecount = flavorsconf.get(sect,"xcount")
-            flavor_classad = classad.ClassAd({"memory":i_memory,"disksize":i_disk,"xcount":i_corecount})
+            flavor_classad = classad.ClassAd({"name": flavorsconf.get(sect, "name"), "memory":i_memory,"disksize":i_disk,"xcount":i_corecount})
             self.log.info('flavor class ad:\n %s' %flavor_classad.printOld())
             check = self._matches_flavor_requirements(flavor_classad)
             if check:
@@ -228,6 +233,26 @@ class hook_translate(hook_base):
         # if nothing found...
         return None
 
+
+    def _set_interactive(self):
+        '''
+        add to the job classad the needed attributes
+        to allow this job to be re-reouted, properly, as an EC2 one
+        '''
+
+        self.ad['EC2AccessKeyId'] = "/etc/virtualgridsite/key"
+        self.ad['EC2SecretAccessKey'] = "/etc/virtualgridsite/key.secret"
+
+        self.ad['EC2SecurityGroups'] = "default"
+        self.ad['EC2AmiID'] = self.image.ami
+        self.ad['EC2InstanceType'] = self.flavor.name
+
+        ip = self.nova.get_next_floating_ip()
+        self.log.info("next floating ip is %s" %ip.ip)
+        self.ad['EC2ElasticIp'] = str(ip.ip)
+
+        self.ad['JobUniverse'] = 9
+        self.ad['GridResource'] = "ec2 http://cldext02.usatlas.bnl.gov:8773/services/Cloud"
 
 
 
@@ -278,16 +303,21 @@ class hook_translate(hook_base):
 
         if "opsys" in self.ad:
             if self.ad.get('opsys') != image.get('opsys'):
+               self.log.info('image %s does not match because opsys' %image.get('name'))
                return False
         if "opsysname" in self.ad:
             if self.ad.get('opsysname') != image.get('opsysname'):
+               self.log.info('image %s does not match because opsysname' %image.get('name'))
                return False
         if "opsysmajorversion" in self.ad:
             if self.ad.get('opsysmajorversion') != image.get('opsysmajorversion'):
+               self.log.info('image %s does not match because opsysmajorversion' %image.get('name'))
                return False
         if "opsysminorversion" in self.ad:
             if self.ad.get('opsysminorversion') != image.get('opsysminorversion'):
+               self.log.info('image %s does not match because opsysminorversion' %image.get('name'))
                return False
+        self.log.info('image %s matches' %image.get('name'))
         return True
 
 
@@ -299,13 +329,17 @@ class hook_translate(hook_base):
 
         if "maxMemory" in self.ad:
             if int(self.ad.get('maxMemory')) > int(flavor.get('memory')):
+               self.log.info('flavor %s does not match because memory' %flavor.get('name'))
                return False
         if "disk" in self.ad:
             if int(self.ad.get('disksize')) > int(flavor.get('disksize')):
+               self.log.info('flavor %s does not match because disksize' %flavor.get('name'))
                return False
         if "xcount" in self.ad:
             if int(self.ad.get('xcount')) > int(flavor.get('xcount')):
+               self.log.info('flavor %s does not match because xcout' %flavor.get('name'))
                return False
+        self.log.info('flavor %s matches' %flavor.get('name'))
         return True
 
 
@@ -314,28 +348,6 @@ class hook_translate(hook_base):
         uploads a VM image into glance
         '''
         self.glance.create_image(filename, image_name)
-
-
-    def _interactive_ec2(self):
-        """
-        adding variables to the job classad
-        so the job can be re-routed as an EC2 one
-        """
-
-        self.ad['EC2AccessKeyId'] = "/etc/virtualgridsite/etc/key"
-        self.ad['EC2SecretAccessKey'] = "/etc/virtualgridsite/key.secret"
-        self.ad['EC2SecurityGroups'] = "default"
-        self.ad['EC2AmiID'] = "ami-0000001c"
-        self.ad['EC2InstanceType'] = "m1.medium"
-
-        ip = self.nova.get_next_floating_ip()
-        self.log.info("next floating ip is %s" %ip.ip)
-        self.ad['EC2ElasticIp'] = str(ip.ip)
-
-        self.ad['JobUniverse'] = 9
-        self.ad['GridResource'] = "ec2 http://cldext02.usatlas.bnl.gov:8773/services/Cloud"
-
-
 
 
 
