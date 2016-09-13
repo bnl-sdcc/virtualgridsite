@@ -38,8 +38,8 @@ class hook_base(object):
         self.ad = ad
         self.username = getpass.getuser()
         self._setlogging()
-        self.nova = _init_nova()
-        self.glance = _init_glance()
+        self.nova = self._init_nova()
+        self.glance = self._init_glance()
         self.conf = SafeConfigParser()
         self.conf.readfp( open('/etc/virtualgridsite/virtualgridsite.conf') )
 
@@ -56,6 +56,28 @@ class hook_base(object):
         logStream.setFormatter(formatter)
         self.log.addHandler(logStream)
         self.log.setLevel(logging.DEBUG)
+
+    # FIXME
+    # too much duplicated code here !!
+    def _init_nova(self):
+        self.novaconf = SafeConfigParser()
+        self.novaconf.readfp(open('/etc/virtualgridsite/nova.conf'))
+        VERSION = self.novaconf.get('NOVA', 'VERSION')
+        USERNAME = self.novaconf.get('NOVA', 'OS_USERNAME')
+        PASSWORD = self.novaconf.get('NOVA', 'OS_PASSWORD')
+        TENANT = self.novaconf.get('NOVA', 'OS_TENANT_NAME')
+        URL = self.novaconf.get('NOVA', 'OS_AUTH_URL')
+        nova = NovaCore(VERSION, USERNAME, PASSWORD, TENANT, URL)
+        return nova
+    
+    def _init_glance(self):
+        VERSION = self.novaconf.get('NOVA', 'VERSION')
+        USERNAME = self.novaconf.get('NOVA', 'OS_USERNAME')
+        PASSWORD = self.novaconf.get('NOVA', 'OS_PASSWORD')
+        TENANT = self.novaconf.get('NOVA', 'OS_TENANT_NAME')
+        URL = self.novaconf.get('NOVA', 'OS_AUTH_URL')
+        glance = GlanceCore(USERNAME, PASSWORD, TENANT, URL)
+        return glance
 
 
 class hook_translate(hook_base):
@@ -252,7 +274,7 @@ class hook_translate(hook_base):
         self.ad['EC2ElasticIp'] = str(ip.ip)
 
         self.ad['JobUniverse'] = 9
-        self.ad['GridResource'] = "ec2 http://cldext02.usatlas.bnl.gov:8773/services/Cloud"
+        self.ad['GridResource'] = "ec2 %s" %self.novaconf.get("EC2", "EC2_URL")
 
 
 
@@ -404,29 +426,6 @@ class hook_cleanup(hook_base):
 
 # =============================================================================
 
-# FIXME
-# too much duplicated code here !!
-def _init_nova():
-    c = SafeConfigParser()
-    c.readfp(open('/etc/virtualgridsite/nova.conf'))
-    VERSION = c.get('NOVA', 'VERSION')
-    USERNAME = c.get('NOVA', 'OS_USERNAME')
-    PASSWORD = c.get('NOVA', 'OS_PASSWORD')
-    TENANT = c.get('NOVA', 'OS_TENANT_NAME')
-    URL = c.get('NOVA', 'OS_AUTH_URL')
-    nova = NovaCore(VERSION, USERNAME, PASSWORD, TENANT, URL)
-    return nova
-
-def _init_glance():
-    c = SafeConfigParser()
-    c.readfp(open('/etc/virtualgridsite/nova.conf'))
-    VERSION = c.get('NOVA', 'VERSION')
-    USERNAME = c.get('NOVA', 'OS_USERNAME')
-    PASSWORD = c.get('NOVA', 'OS_PASSWORD')
-    TENANT = c.get('NOVA', 'OS_TENANT_NAME')
-    URL = c.get('NOVA', 'OS_AUTH_URL')
-    glance = GlanceCore(USERNAME, PASSWORD, TENANT, URL)
-    return glance
 
 
 
