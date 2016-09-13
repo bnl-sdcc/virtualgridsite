@@ -103,6 +103,9 @@ class hook_translate(hook_base):
         if 'virtualgridsite_url' in self.ad:
             return True
 
+        if 'virtualgridsite_interactive_vm' in self.ad:
+            return True
+
         # if no reason to boot a VM...
         return False
 
@@ -311,6 +314,29 @@ class hook_translate(hook_base):
         uploads a VM image into glance
         '''
         self.glance.create_image(filename, image_name)
+
+
+    def _interactive_ec2(self):
+        """
+        adding variables to the job classad
+        so the job can be re-routed as an EC2 one
+        """
+
+        self.ad['EC2AccessKeyId'] = "/etc/virtualgridsite/etc/key"
+        self.ad['EC2SecretAccessKey'] = "/etc/virtualgridsite/key.secret"
+        self.ad['EC2SecurityGroups'] = "default"
+        self.ad['EC2AmiID'] = "ami-0000001c"
+        self.ad['EC2InstanceType'] = "m1.medium"
+
+        ip = self.nova.get_next_floating_ip()
+        self.log.info("next floating ip is %s" %ip.ip)
+        self.ad['EC2ElasticIp'] = str(ip.ip)
+
+        self.ad['JobUniverse'] = 9
+        self.ad['GridResource'] = "ec2 http://cldext02.usatlas.bnl.gov:8773/services/Cloud"
+
+
+
 
 
 
