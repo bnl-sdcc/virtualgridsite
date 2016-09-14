@@ -23,6 +23,7 @@ class Image(object):
         self.opsys = None
         self.opsysname = None
         self.opsysmajorversion = None
+        self.mode = None
 
 class Flavor(object):
     def __init__(self):
@@ -197,11 +198,20 @@ class hook_translate(hook_base):
         imagesconf = SafeConfigParser()
         imagesconf.readfp(open('/etc/virtualgridsite/images.conf'))
         for sect in imagesconf.sections():
+            i_name = imagesconf.get(sect, "name")
             i_opsys = imagesconf.get(sect,"opsys")
             i_opsysname = imagesconf.get(sect,"opsysname")
             i_opsysmajorversion = imagesconf.get(sect,"opsysmajorversion")
             i_ami = imagesconf.get(sect, "ami")
-            image_classad = classad.ClassAd({"opsys":i_opsys,"opsysname":i_opsysname,"opsysmajorversion":i_opsysmajorversion})
+            i_mode = imagesconf.get(sect, "mode")
+            image_classad = classad.ClassAd(
+                                {"name": i_name,
+                                 "opsys": i_opsys,
+                                 "opsysname": i_opsysname,
+                                 "opsysmajorversion": i_opsysmajorversion,
+                                 "mode": i_mode
+                                }
+                            )
             self.log.info('image class ad:\n %s' %image_classad.printOld())
             check = self._matches_image_requirements(image_classad)
             if check:
@@ -215,6 +225,7 @@ class hook_translate(hook_base):
                 image.opsysname = i_opsysname
                 image.opsysmajorversion = i_opsysmajorversion
                 image.ami = i_ami
+                image.mode = i_mode
                 return image
                 
         # if nothing found...
@@ -234,21 +245,27 @@ class hook_translate(hook_base):
         flavorsconf = SafeConfigParser()
         flavorsconf.readfp(open('/etc/virtualgridsite/flavors.conf'))
         for sect in flavorsconf.sections():
-            i_memory = flavorsconf.get(sect,"memory")
-            i_disk = flavorsconf.get(sect,"disksize")
-            i_corecount = flavorsconf.get(sect,"xcount")
-            flavor_classad = classad.ClassAd({"name": flavorsconf.get(sect, "name"), "memory":i_memory,"disksize":i_disk,"xcount":i_corecount})
+            f_name = flavorsconf.get(sect, "name")
+            f_memory = flavorsconf.get(sect,"memory")
+            f_disk = flavorsconf.get(sect,"disksize")
+            f_corecount = flavorsconf.get(sect,"xcount")
+            flavor_classad = classad.ClassAd(
+                                {"name": f_name, 
+                                 "memory": f_memory,
+                                 "disksize": f_disk,
+                                 "xcount":f_corecount
+                                }
+                             )
             self.log.info('flavor class ad:\n %s' %flavor_classad.printOld())
             check = self._matches_flavor_requirements(flavor_classad)
             if check:
                 self.log.info('flavor %s and job match? %s' %(sect, check))
-                flavor_name = flavorsconf.get(sect, "name")
-                self.log.info('flavor found: %s' %flavor_name)
+                self.log.info('flavor found: %s' %f_name)
                 flavor = Flavor()
-                flavor.name = flavor_name
-                flavor.memory = i_memory
-                flavor.xcount = i_corecount
-                flavor.disksize = i_disk
+                flavor.name = f_name
+                flavor.memory = f_memory
+                flavor.xcount = f_corecount
+                flavor.disksize = f_disk
                 return flavor
 
 
@@ -339,6 +356,11 @@ class hook_translate(hook_base):
             if self.ad.get('opsysminorversion') != image.get('opsysminorversion'):
                self.log.info('image %s does not match because opsysminorversion' %image.get('name'))
                return False
+        if "virtualgridsite_interactive_vm" in self.ad:
+            if image.get('mode') != "interactive":
+               self.log.info('image %s does not match because mode' %image.get('name'))
+               return False
+
         self.log.info('image %s matches' %image.get('name'))
         return True
 
