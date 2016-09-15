@@ -107,7 +107,7 @@ class hook_translate(hook_base):
         return self.ad
 
 
-   def _requires_vm(self):
+    def _requires_vm(self):
         '''
         decides if booting a VM server in OpenStack is needed or not
         '''
@@ -163,7 +163,7 @@ class hook_translate(hook_base):
 
     def _choose_image(self):
 
-       if 'virtualgridsite_image_url' in self.ad:
+        if 'virtualgridsite_image_url' in self.ad:
             # 1. check the URL 
             url = self.ad['virtualgridsite_image_url']
             self.log.info('detected classad virtualgridsite_image_url %s' %url)
