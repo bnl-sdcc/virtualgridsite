@@ -114,22 +114,6 @@ class hook_translate(hook_base):
         
         if self.conf.getboolean('VIRTUALGRIDSITE', 'always_vm'):
             return True
-        # FIXME
-        # this can be done probably with self.ad.get('foo')
-        if 'opsys' in self.ad and\
-            self.conf.has_option('VIRTUALGRIDSITE','farm_opsys') and\
-            self.ad['opsys'] != self.conf.get('VIRTUALGRIDSITE', 'farm_opsys'):
-                return True
-
-        if 'opsysname' in self.ad and\
-            self.conf.has_option('VIRTUALGRIDSITE','farm_opsysname') and\
-            self.ad['opsysname'] != self.conf.get('VIRTUALGRIDSITE', 'farm_opsysname'):
-                return True
-
-        if 'opsysmajorversion' in self.ad and\
-            self.conf.has_option('VIRTUALGRIDSITE','farm_opsysmajorversion') and\
-            self.ad['opsysmajorversion'] != self.conf.get('VIRTUALGRIDSITE', 'farm_opsysmajorversion'):
-                return True
 
         if 'virtualgridsite_image_name' in self.ad:
             return True
@@ -140,8 +124,48 @@ class hook_translate(hook_base):
         if 'virtualgridsite_interactive_vm' in self.ad:
             return True
 
+       if not self._job_matches_farm():
+            self.log.info('_job_matches_farm() returned False')
+            return True
+
         # if no reason to boot a VM...
         return False
+
+
+    def _job_matches_farm(self):
+        # FIXME
+        # too much duplicated code between this method and 
+        # method _choose_image()
+        """
+        checks if the job can be run in any of the farm nodes 
+        """
+
+        self.log.info('starting')
+
+        imagesconf = SafeConfigParser()
+        imagesconf.readfp(open('/etc/virtualgridsite/static.conf'))
+        for sect in imagesconf.sections():
+            i_name = imagesconf.get(sect, "name")
+            self.log.info('analyzing static farm node type %s' %i_name)
+            i_opsys = imagesconf.get(sect,"opsys")
+            i_opsysname = imagesconf.get(sect,"opsysname")
+            i_opsysmajorversion = imagesconf.get(sect,"opsysmajorversion")
+            image_classad = classad.ClassAd(
+                                {"name": i_name,
+                                 "opsys": i_opsys,
+                                 "opsysname": i_opsysname,
+                                 "opsysmajorversion": i_opsysmajorversion,
+                                }
+                            )
+            self.log.info('static node class ad:\n %s' %image_classad.printOld())
+            check = self._matches_image_requirements(image_classad)
+            if check:
+                self.log.info('static node %s is able to run the job' %i_name)
+                return True
+        # no node type matches this job...
+        self.log.info('no static node is able to run the job')
+        return False
+
 
 
     def _choose_vm(self):
