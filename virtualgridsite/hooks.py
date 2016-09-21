@@ -189,6 +189,11 @@ class hook_translate(hook_base):
 
 
     def _choose_image(self):
+        #
+        #       !!! FIXME !!!
+        #       there is way too much duplicated code is this method
+        #       !!! FIXME !!!
+        #
 
         if 'virtualgridsite_image_url' in self.ad:
             # 1. check the URL 
@@ -225,10 +230,44 @@ class hook_translate(hook_base):
 
         if 'virtualgridsite_image_name' in self.ad:
             image_name = self.ad['virtualgridsite_image_name']
-            self.log.info('using image name passed as classad: %s' %image_name)
-            image = Image()
-            image.name = image_name
-            return image
+            self.log.info('trying to use image name passed as classad: %s' %image_name)
+            imagesconf = SafeConfigParser()
+            imagesconf.readfp(open('/etc/virtualgridsite/images.conf'))
+            for sect in imagesconf.sections():
+                i_name = imagesconf.get(sect, "name")
+                if i_name == image_name:
+                    i_opsys = imagesconf.get(sect,"opsys")
+                    i_opsysname = imagesconf.get(sect,"opsysname")
+                    i_opsysmajorversion = imagesconf.get(sect,"opsysmajorversion")
+                    i_ami = imagesconf.get(sect, "ami")
+                    i_mode = imagesconf.get(sect, "mode")
+                    i_mode = self._modelist(i_mode) 
+                    image = Image()
+                    image.name = image_name
+                    image.opsys = i_opsys
+                    image.opsysname = i_opsysname
+                    image.opsysmajorversion = i_opsysmajorversion
+                    image.ami = i_ami
+                    image.mode = i_mode
+                    image_classad = classad.ClassAd(
+                                        {"name": i_name,
+                                         "opsys": i_opsys,
+                                         "opsysname": i_opsysname,
+                                         "opsysmajorversion": i_opsysmajorversion,
+                                         "mode": i_mode
+                                        }
+                                    )
+                    check = self._matches_image_requirements(image_classad)
+                    if check:
+                        self.log.info('using image name passed as classad: %s' %image_name)
+                        return image
+                    else:
+                        self.log.error('the configuration for image %s is not valid' %image_name)
+                        raise Exception    
+            else:
+                self.log.error('there is no configuration for image %s' %image_name)
+                raise Exception    
+
 
         imagesconf = SafeConfigParser()
         imagesconf.readfp(open('/etc/virtualgridsite/images.conf'))
@@ -392,7 +431,7 @@ class hook_translate(hook_base):
                self.log.info('image %s does not match because opsysminorversion' %image.get('name'))
                return False
         if "virtualgridsite_interactive_vm" in self.ad:
-            if image.get('mode') != "interactive":
+            if "interactive" not in image.get('mode'):
                self.log.info('image %s does not match because mode' %image.get('name'))
                return False
 
@@ -427,6 +466,12 @@ class hook_translate(hook_base):
         uploads a VM image into glance
         '''
         self.glance.create_image(filename, image_name)
+
+
+    def _mode2list(self, mode):
+        l = mode.split(',')
+        l = [i.strip() for i in l]
+        return l
 
 
 
