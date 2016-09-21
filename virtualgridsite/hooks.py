@@ -97,12 +97,15 @@ class hook_translate(hook_base):
         requires = self._requires_vm()
         self.log.info('_requires_vm() returned %s' %requires)
         if requires:
-            self._choose_vm()
-            if 'virtualgridsite_interactive_vm' in self.ad:
-                self._set_interactive()
-            else:
-                self._boot_os_server()
-                self._build_requirements()
+            try:
+                self._choose_vm()
+                if 'virtualgridsite_interactive_vm' in self.ad:
+                    self._set_interactive()
+                else:
+                    self._boot_os_server()
+                    self._build_requirements()
+            except Exception, ex:
+                self.log.critical('something went wrong. Aborting')
 
         return self.ad
 
