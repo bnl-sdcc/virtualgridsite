@@ -99,7 +99,7 @@ class hook_translate(hook_base):
         if requires:
             try:
                 self._choose_vm()
-                if 'virtualgridsite_interactive_vm' in self.ad:
+                if 'virtualgridsite_interactive_vm' in self.ad and self.ad.get('virtualgridsite_interactive_vm') == True:
                     self._set_interactive()
                 else:
                     self._boot_os_server()
@@ -124,7 +124,7 @@ class hook_translate(hook_base):
         if 'virtualgridsite_url' in self.ad:
             return True
 
-        if 'virtualgridsite_interactive_vm' in self.ad:
+        if 'virtualgridsite_interactive_vm' in self.ad and self.ad.get('virtualgridsite_interactive_vm') == True:
             return True
 
        if not self._job_matches_farm():
@@ -430,7 +430,7 @@ class hook_translate(hook_base):
             if int(self.ad.get('opsysminorversion')) != int(image.get('opsysminorversion')):
                self.log.info('image %s does not match because opsysminorversion' %image.get('name'))
                return False
-        if "virtualgridsite_interactive_vm" in self.ad:
+        if "virtualgridsite_interactive_vm" in self.ad and self.ad.get('virtualgridsite_interactive_vm') == True:
             if "interactive" not in image.get('mode'):
                self.log.info('image %s does not match because mode' %image.get('name'))
                return False
