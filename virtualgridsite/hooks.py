@@ -423,11 +423,11 @@ class hook_translate(hook_base):
                self.log.info('image %s does not match because opsysname' %image.get('name'))
                return False
         if "opsysmajorversion" in self.ad:
-            if self.ad.get('opsysmajorversion') != int(image.get('opsysmajorversion')):
+            if int(self.ad.get('opsysmajorversion')) != int(image.get('opsysmajorversion')):
                self.log.info('image %s does not match because opsysmajorversion' %image.get('name'))
                return False
         if "opsysminorversion" in self.ad:
-            if self.ad.get('opsysminorversion') != int(image.get('opsysminorversion')):
+            if (self.ad.get('opsysminorversion')) != int(image.get('opsysminorversion')):
                self.log.info('image %s does not match because opsysminorversion' %image.get('name'))
                return False
         if "virtualgridsite_interactive_vm" in self.ad:
