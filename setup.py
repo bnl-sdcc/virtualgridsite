@@ -36,10 +36,14 @@ share = ['share/condor_ce_router_defaults_nova',
         ]
 
 
+sbin_scripts = ['sbin/submit',
+               ]
+
 rpm_data_files=[('/etc/virtualgridsite', etc_files),
                 #('/etc/condor/config.d', etc_condor_files),
                 ('/etc/condor-ce/config.d', etc_condorce_files),
                 ('/usr/share/virtualgridsite', share),
+                ('/usr/sbin', sbin_scripts),
                ]
 
 

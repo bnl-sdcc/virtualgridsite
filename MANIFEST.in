@@ -4,3 +4,4 @@ include etc/nova/*
 include etc/virtualgridsite/*
 include etc/condor-ce/*
 include share/*
+include sbin/*
