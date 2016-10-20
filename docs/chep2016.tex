@@ -1,25 +1,55 @@
+\documentclass[a4paper]{jpconf}
+\usepackage{graphicx}
+\usepackage{afterpage}
+\begin{document}
+\title{Interfacing HTCondor-CE with OpenStack}
+
+\author{B. Bockelman$^1$, J. Caballero Bejar$^2$, J. Hover $^2$}
+
+\address{$^1$ University of Nebraska-Lincoln, Lincoln, NE 68588, USA}
+\address{$^2$ Brookhaven National Laboratory, PO BOX 5000 Upton, NY 11973, USA}
+
+\ead{jcaballero@bnl.gov}
+
+\begin{abstract}
+Over the past few years, Grid Computing technologies have reached a high
+level of maturity. One key aspect of this success has been the development and adoption of newer Compute Elements to interface the external Grid users with local batch systems. These new Compute Elements allow for better handling of jobs requirements and a more precise management of diverse local resources.
+
+However, despite this level of maturity, the Grid Computing world is
+lacking diversity in local execution platforms. As Grid
+Computing technologies have historically been driven by the needs of the High Energy Physics community, most resource providers run the platform (operating system version and architecture) that best suits the needs of their particular users.
+
+In parallel, the development of virtualization and cloud technologies has accelerated recently, making available a variety of solutions, both
+commercial and academic, proprietary and open source. Virtualization facilitates performing computational tasks on platforms not available at most computing sites.
+
+This work attempts to join the technologies, allowing users to interact
+with computing sites through one of the standard Computing Elements, HTCondor-CE, but running their jobs within VMs on a local cloud platform, OpenStack, when needed.
+
+The system will re-route, in a transparent way, end user jobs into dynamically-launched VM worker nodes when they have requirements that cannot be satisfied by the static local batch system nodes. Also, once the automated mechanisms are in place, it becomes straightforward to allow an end user to invoke a custom Virtual Machine at the site. This will allow cloud resources to be used without requiring the user to establish a separate account. Both scenarios are described in this work.
+\end{abstract}
+
+\section{Introduction}
 
 
-
-
-@article{condor-practice, 
-  author    = "Douglas Thain and Todd Tannenbaum and Miron Livny",
-  title     = "Distributed computing in practice: the Condor experience.",
-  journal   = "Concurrency - Practice and Experience",
-  volume    = "17",
-  number    = "2-4",
-  year      = "2005",
-  pages     = "323-356",
+%%\section{Acknowledgements}
+\ack{
+The authors would like to thank the HTCondor developers for their constant support.
 }
 
 
-@article{1742-6596-664-6-062003,
-    author={B Bockelman and T Cartwright and J Frey and E M Fajardo and B Lin and M Selmeci and T Tannenbaum and M Zvada},
-    title={Commissioning the HTCondor-CE for the Open Science Grid},
-    journal={Journal of Physics: Conference Series},
-    volume={664},
-    number={6},
-    pages={062003},
-    url={http://stacks.iop.org/1742-6596/664/i=6/a=062003},
-    year={2015},
-}
+\section*{References}{}
+
+\bibliographystyle{iopart-num}
+\bibliography{references}
+
+~
+
+Notice:
+This manuscript has been authored by employees of Brookhaven Science Associates,
+LLC under Contract No. DE-AC02-98CH10886 with the U.S. Department of Energy.
+The publisher by accepting the manuscript for publication acknowledges
+that the United States Government retains a non-exclusive, paid-up, irrevocable,
+world-wide license to publish or reproduce the published form of this manuscript,
+or allow others to do so, for United States Government purposes.
+
+\end{document}
