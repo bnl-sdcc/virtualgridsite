@@ -12,6 +12,13 @@ f_donload_src(){
     wget -N https://raw.githubusercontent.com/jose-caballero/virtualgridsite/master/docs/chep2016.bbl
 }
 
+f_download_images(){
+    wget -N http://www.usatlas.bnl.gov/~caballer/files/uml/virtualgridsite/opportunistic.png
+    wget -N http://www.usatlas.bnl.gov/~caballer/files/uml/virtualgridsite/dedicated.png
+    wget -N http://www.usatlas.bnl.gov/~caballer/files/uml/virtualgridsite/opportunistic_custom.png
+    wget -N http://www.usatlas.bnl.gov/~caballer/files/uml/virtualgridsite/dedicated_custom.png
+}
+
 f_latex(){
     latex chep2016.tex
 }
@@ -29,17 +36,21 @@ f_cleanup(){
     rm -f chep2016.dvi
     rm -f chep2016.log
     rm -f chep2016.ps
-
-    mv -f chep2016.pdf /afs/usatlas.bnl.gov/users/caballer/WWW/files/tmp/chep2016.pdf
 }
 
+# -----------------------------------------------------------------------------
 
-#f_download_template
+f_download_template
 if [ $? -ne 0 ]; then
     exit 
 fi
 
 f_donload_src
+if [ $? -ne 0 ]; then
+    exit 
+fi
+
+f_download_images
 if [ $? -ne 0 ]; then
     exit 
 fi
