@@ -1,6 +1,13 @@
 \documentclass[a4paper]{jpconf}
 \usepackage{graphicx}
 \usepackage{afterpage}
+
+\usepackage{xcolor}
+\definecolor{htcondorbox}{RGB}{200,200,200}
+
+%\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
 \begin{document}
 \title{Interfacing HTCondor-CE with OpenStack}
 
@@ -30,6 +37,81 @@ The system will re-route, in a transparent way, end user jobs into dynamically-l
 
 \section{Introduction}
 
+blah blah blah
+
+\begin{center}
+    \colorbox{htcondorbox}{
+        \begin{minipage}{\textwidth}
+        \small
+            \bf{JOB\_ROUTER\_HOOK\_KEYWORD = NOVA \newline \newline
+                %NOVA\_HOOK\_TRANSLATE\_JOB = \newline \hspace*{1cm}/usr/share/virtualgridsite/nova\_hook\_translate\_job \newline
+                %NOVA\_HOOK\_UPDATE\_JOB\_INFO = \newline \hspace*{1cm}/usr/libexec/nova\_hook\_update\_job\_info \newline
+                %NOVA\_HOOK\_JOB\_EXIT = \newline \hspace*{1cm}/usr/libexec/nova\_hook\_job\_exit \newline
+                %NOVA\_HOOK\_JOB\_CLEANUP = \newline \hspace*{1cm}/usr/libexec/nova\_hook\_cleanup\_job
+                NOVA\_HOOK\_TRANSLATE\_JOB = /usr/share/virtualgridsite/nova\_hook\_translate\_job \newline
+                NOVA\_HOOK\_UPDATE\_JOB\_INFO = /usr/libexec/nova\_hook\_update\_job\_info \newline
+                NOVA\_HOOK\_JOB\_EXIT = /usr/libexec/nova\_hook\_job\_exit \newline
+                NOVA\_HOOK\_JOB\_CLEANUP = /usr/libexec/nova\_hook\_cleanup\_job
+            }
+        \end{minipage}
+    }
+\end{center}
+
+
+\begin{center}
+    \colorbox{htcondorbox}{
+        \begin{minipage}{\textwidth}
+        \small
+            \bf{START\_LOCAL\_UNIVERSE = False  \newline
+                START\_SCHEDULER\_UNIVERSE = \$(START\_LOCAL\_UNIVERSE)
+            }
+        \end{minipage}
+    }
+\end{center}
+
+
+
+\begin{center}
+    \colorbox{htcondorbox}{
+        \begin{minipage}{\textwidth}
+        \small
+            \bf{JOB\_ROUTER\_ENTRIES\_CMD = \newline 
+                \hspace*{1cm}/usr/lib/python2.6/site-packages/virtualgridsite/routes.py \newline
+                JOB\_ROUTER\_ENTRIES\_REFRESH = 600
+            }
+        \end{minipage}
+    }
+\end{center}
+
+
+\begin{center}
+    \colorbox{htcondorbox}{
+        \begin{minipage}{\textwidth}
+        \small
+            \bf{NOVA\_ATTRS\_TO\_COPY = EC2ElasticIP
+            }
+        \end{minipage}
+    }
+\end{center}
+
+
+\begin{center}
+    \colorbox{htcondorbox}{
+        \begin{minipage}{\textwidth}
+        \small
+            \bf{JOB\_ROUTER\_SOURCE\_JOB\_CONSTRAINT = \newline
+               (target.x509userproxysubject =!= UNDEFINED) \&\& \newline
+               (target.x509UserProxyExpiration =!= UNDEFINED) \&\& \newline
+               (time() \textless \  target.x509UserProxyExpiration)
+            }
+        \end{minipage}
+    }
+\end{center}
+
+
+
+
+
 \section{Prototype description}
 
 \subsection{Case 1: elastic expansion}
@@ -40,7 +122,41 @@ The system will re-route, in a transparent way, end user jobs into dynamically-l
 
 \section{Security}
 
+security blah blah
+
+\begin{center}
+    \colorbox{htcondorbox}{
+        %\begin{minipage}{0.95\textwidth}
+        \begin{minipage}{\textwidth}
+        \small
+            \bf{START\_LOCAL\_UNIVERSE = False \newline
+                START\_SCHEDULER\_UNIVERSE = \$(START\_LOCAL\_UNIVERSE)
+            }
+        \end{minipage}
+    }
+\end{center}
+
+
 \section{Problems found}
+
+problems blah blah
+
+\begin{center}
+    \colorbox{htcondorbox}{
+        \begin{minipage}{\textwidth}
+        \small
+            \bf{[
+                 Name = "No\_route";  \newline
+                 EditJobInPlace = true; \newline
+                 set\_noreroute = "True"; \newline
+                 Requirements = TARGET.noreroute is undefined \&\& \textless node requirements\textgreater;  \newline
+                 set\_PeriodicRemove = ( JobStatus == 1 \&\& ( time() - EnteredCurrentStatus ) \textgreater \ 10 ); \newline
+                 TargetUniverse = 5 \newline
+                 ]
+            }
+        \end{minipage}
+    }
+\end{center}
 
 \section{Future work}
 
