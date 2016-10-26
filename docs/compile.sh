@@ -19,6 +19,12 @@ f_download_images(){
     wget -N http://www.usatlas.bnl.gov/~caballer/files/uml/virtualgridsite/dedicated_custom.png
 }
 
+f_pdflatex(){
+    #  twice, to compile the cross references
+    pdflatex chep2016.tex
+    pdflatex chep2016.tex
+}
+
 f_latex(){
     latex chep2016.tex
 }
@@ -55,20 +61,24 @@ if [ $? -ne 0 ]; then
     exit 
 fi
 
-f_latex
+#f_latex
+#if [ $? -ne 0 ]; then
+#    exit 
+#fi
+#f_dvips
+#if [ $? -ne 0 ]; then
+#    exit 
+#fi
+#f_ps2pdf
+#if [ $? -ne 0 ]; then
+#    exit 
+#fi
+
+f_pdflatex
 if [ $? -ne 0 ]; then
     exit 
 fi
 
-f_dvips
-if [ $? -ne 0 ]; then
-    exit 
-fi
-
-f_ps2pdf
-if [ $? -ne 0 ]; then
-    exit 
-fi
 
 f_cleanup
 if [ $? -ne 0 ]; then

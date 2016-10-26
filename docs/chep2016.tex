@@ -1,12 +1,14 @@
 \documentclass[a4paper]{jpconf}
 \usepackage{graphicx}
+\graphicspath{ {images/} }
+\usepackage{subfig}
 \usepackage{afterpage}
-
+\usepackage{lmodern}
 \usepackage{xcolor}
 \definecolor{htcondorbox}{RGB}{200,200,200}
+\usepackage{lineno}
+\linenumbers
 
-%\usepackage[T1]{fontenc}
-\usepackage{lmodern}
 
 \begin{document}
 \title{Interfacing HTCondor-CE with OpenStack}
@@ -16,30 +18,96 @@
 \address{$^1$ University of Nebraska-Lincoln, Lincoln, NE 68588, USA}
 \address{$^2$ Brookhaven National Laboratory, PO BOX 5000 Upton, NY 11973, USA}
 
-\ead{jcaballero@bnl.gov}
+\ead{bbockelm@cse.unl.edu, jcaballero@bnl.gov, jhover@bnl.gov}
 
 \begin{abstract}
-Over the past few years, Grid Computing technologies have reached a high
-level of maturity. One key aspect of this success has been the development and adoption of newer Compute Elements to interface the external Grid users with local batch systems. These new Compute Elements allow for better handling of jobs requirements and a more precise management of diverse local resources.
+Over the past few years, Grid Computing technologies have reached a high level of maturity. 
+One key aspect of this success has been the development and adoption of newer Compute Elements to interface the external Grid users with local batch systems. 
+These new Compute Elements allow for better handling of jobs requirements and a more precise management of diverse local resources.
 
-However, despite this level of maturity, the Grid Computing world is
-lacking diversity in local execution platforms. As Grid
-Computing technologies have historically been driven by the needs of the High Energy Physics community, most resource providers run the platform (operating system version and architecture) that best suits the needs of their particular users.
+However, despite this level of maturity, the Grid Computing world is lacking diversity in local execution platforms. 
+As Grid Computing technologies have historically been driven by the needs of the High Energy Physics community, 
+most resource providers run the platform (operating system version and architecture) that best suits the needs of their particular users.
 
-In parallel, the development of virtualization and cloud technologies has accelerated recently, making available a variety of solutions, both
-commercial and academic, proprietary and open source. Virtualization facilitates performing computational tasks on platforms not available at most computing sites.
+In parallel, the development of virtualization and cloud technologies has accelerated recently, 
+making available a variety of solutions, both commercial and academic, proprietary and open source. 
+Virtualization facilitates performing computational tasks on platforms not available at most computing sites.
 
-This work attempts to join the technologies, allowing users to interact
-with computing sites through one of the standard Computing Elements, HTCondor-CE, but running their jobs within VMs on a local cloud platform, OpenStack, when needed.
+This work attempts to join the technologies, allowing users to interact with computing sites through one of the standard Computing Elements, HTCondor-CE,
+but running their jobs within VMs on a local cloud platform, OpenStack, when needed.
 
-The system will re-route, in a transparent way, end user jobs into dynamically-launched VM worker nodes when they have requirements that cannot be satisfied by the static local batch system nodes. Also, once the automated mechanisms are in place, it becomes straightforward to allow an end user to invoke a custom Virtual Machine at the site. This will allow cloud resources to be used without requiring the user to establish a separate account. Both scenarios are described in this work.
+The system will re-route, in a transparent way, 
+end user jobs into dynamically-launched VM worker nodes when they have requirements that cannot be satisfied by the static local batch system nodes. 
+Also, once the automated mechanisms are in place, it becomes straightforward to allow an end user to invoke a custom Virtual Machine at the site. 
+This will allow cloud resources to be used without requiring the user to establish a separate account. Both scenarios are described in this work.
 \end{abstract}
 
 \section{Introduction}
 
-blah blah blah
+In parallel to the evolution of the Grid Computing technologies, a pletora of virtualization tools and techniques have been developed,
+both in the industry and academia worlds.
+The Grid Computing has reached a high level of maturity on certain aspects, but it lacks some flexibility in others.
+In particular, the type of flexibility that those virtualization tools can offer. 
+For historical reasons the Grid Computing technology has evolved around the needs of the High Energy Physics (HEP) community, 
+which has a very limited set of contrains, but those are in fact almost unavoidable. 
+One example of these contrains is the need for a specific Linux platform to be deployed on the resources part of the HEP-oriented Grid infrastructre.
 
-\begin{center}
+~
+
+This scenario is highly efficient for the HEP experiments, 
+but may present a barrier for other scientific communities.
+
+~
+
+On the another hand, many scientific and academia facilities offer to their employees -or even to external scientist-,
+the ability to use virtualization platforms. 
+Several of these platforms have become very mature products over the past years \textbf{ADD REFERENCES HERE TO OPENSTACK AND OPENNEBULA, FOR EXAMPLE} \newline
+The usage of these virtualized resources eliminates the contrains in the classic Grid infrastructure, 
+but forces the users to learn how to use them, including getting the client tools and ID accounts. 
+
+~
+
+The goal of this work is to bring both worlds, the Grid Computing and the virtualization, closer to each other. 
+We study how to allow users to submit their grid jobs to a standard Compute Element -the HTCondor-CE in this work-,
+expressing platform requirements that do not necesarily fit the classical HEP-oriented environment.
+Also, we present a mechanism to let users to interact with a virtualization cluster without requiring
+special knowledge, install clients, or request authentication credentials. 
+
+\subsection{Prototype setup}
+
+~
+
+The setup for this prototype was simple. 
+All grid identities where mapped at the CE as a single UNIX account, which also corresponded to the unique OpenStack tenant. 
+The backend batch queue was also HTCondor.
+The VM images used in OpenStack had an HTCondor startd preconfigured to join the mentioned backup HTCondor pool. 
+These startd daemons were also preconfigured to shut down after the first job finished, in order to prevent them from picking more than one job. 
+
+Also, job submission was done one by one.
+
+The technical specifications of the OpenStack cluster used for this prototype are as listed 
+
+\begin{itemize}
+\item OpenStack instance: Icehouse.
+\item 120 compute nodes (16 cores, 32 GM RAM, 2 to 5 TB disks).
+\item 200 TB Swift (Amazon S3-equivalent) object store.
+\item EC2 API enabled.
+\end{itemize}
+
+
+\section{Prototype description}
+
+~
+
+In order to allow the HTCondor-CE to dedice when jobs need to be executed on a VM server in OpenStack 
+instead of any of nodes in the backend batch system,
+we make use of one feature included in the CE: the JobRouter hooks \textbf{MAYBE ADD REFERENCE HERE} \newline
+The Job Router is, by definition, ad add-on that transform jobs from one type to another according to a configurable policy. 
+The Job Router hooks are arbitrary code that can be invoked at some points during the job life cycle.
+Example on how to set HTCondor-CE to use hooks can be seen in \ref{snippet1} 
+\newline \textbf{?? HOW DO I ADD A CAPTION TO A MINIPAGE OTHER THAN FIGURE ???}
+
+\begin{figure}[h!]
     \colorbox{htcondorbox}{
         \begin{minipage}{\textwidth}
         \small
@@ -51,10 +119,46 @@ blah blah blah
             }
         \end{minipage}
     }
-\end{center}
+\caption{snippet 1}
+\label{snippet1}
+\end{figure}
+
+%\begin{center}
+%    \colorbox{htcondorbox}{
+%        \begin{minipage}{\textwidth}
+%        \small
+%            \bf{JOB\_ROUTER\_HOOK\_KEYWORD = NOVA \newline \newline
+%                NOVA\_HOOK\_TRANSLATE\_JOB = /usr/share/virtualgridsite/nova\_hook\_translate\_job \newline
+%                NOVA\_HOOK\_UPDATE\_JOB\_INFO = /usr/libexec/nova\_hook\_update\_job\_info \newline
+%                NOVA\_HOOK\_JOB\_EXIT = /usr/libexec/nova\_hook\_job\_exit \newline
+%                NOVA\_HOOK\_JOB\_CLEANUP = /usr/libexec/nova\_hook\_cleanup\_job
+%            }
+%        \end{minipage}
+%    }
+%\end{center}
 
 
-\begin{center}
+
+\subsection{Case 1: elastic expansion}
+
+~
+
+The first scenario allows running user's job on an OpenStack server when the job's requirements 
+do not match the characteristics of the nodes in the backend batch system. 
+
+
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{opportunistic.png}
+    \caption{Sequence diagram for the elastic case}
+    \label{fig:elastic}
+\end{figure}
+
+
+
+\begin{figure}[h!]
     \colorbox{htcondorbox}{
         \begin{minipage}{\textwidth}
         \small
@@ -63,11 +167,13 @@ blah blah blah
             }
         \end{minipage}
     }
-\end{center}
+\caption{snippet 1}
+\label{snippet1}
+\end{figure}
 
 
 
-\begin{center}
+\begin{figure}[h!]
     \colorbox{htcondorbox}{
         \begin{minipage}{\textwidth}
         \small
@@ -77,10 +183,12 @@ blah blah blah
             }
         \end{minipage}
     }
-\end{center}
+\caption{snippet 1}
+\label{snippet1}
+\end{figure}
 
 
-\begin{center}
+\begin{figure}[h!]
     \colorbox{htcondorbox}{
         \begin{minipage}{\textwidth}
         \small
@@ -88,10 +196,12 @@ blah blah blah
             }
         \end{minipage}
     }
-\end{center}
+\caption{snippet 1}
+\label{snippet1}
+\end{figure}
 
 
-\begin{center}
+\begin{figure}[h!]
     \colorbox{htcondorbox}{
         \begin{minipage}{\textwidth}
         \small
@@ -102,25 +212,48 @@ blah blah blah
             }
         \end{minipage}
     }
-\end{center}
+\caption{snippet 1}
+\label{snippet1}
+\end{figure}
 
 
 
 
 
-\section{Prototype description}
 
-\subsection{Case 1: elastic expansion}
+
 
 \subsection{Case 2: interactive usage}
 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{dedicated.png}
+    \caption{Sequence diagram for the interactive usage case}
+    \label{fig:interactive}
+\end{figure}
+
 \subsection{Custom virtual machine image}
+
+
+\begin{figure}%
+    \centering
+    \subfloat[elastic case]{{\includegraphics[width=0.45\textwidth]{opportunistic_custom.png} }}%
+    \qquad
+    \subfloat[interactive usage]{{\includegraphics[width=0.45\textwidth]{dedicated_custom.png} }}%
+    \caption{Sequence diagrams when using user's custom image}%
+    \label{fig:custom}%
+\end{figure}
+
+
+
+
 
 \section{Security}
 
 security blah blah
 
-\begin{center}
+\begin{figure}[h!]
     \colorbox{htcondorbox}{
         %\begin{minipage}{0.95\textwidth}
         \begin{minipage}{\textwidth}
@@ -130,14 +263,16 @@ security blah blah
             }
         \end{minipage}
     }
-\end{center}
+\caption{snippet 1}
+\label{snippet1}
+\end{figure}
 
 
 \section{Problems found}
 
 problems blah blah
 
-\begin{center}
+\begin{figure}[h!]
     \colorbox{htcondorbox}{
         \begin{minipage}{\textwidth}
         \small
@@ -152,7 +287,9 @@ problems blah blah
             }
         \end{minipage}
     }
-\end{center}
+\caption{snippet 1}
+\label{snippet1}
+\end{figure}
 
 \section{Future work}
 
