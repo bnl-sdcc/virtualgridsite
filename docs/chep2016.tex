@@ -256,6 +256,9 @@ This is done by passing the URL with the image as a job classad:
 
 As can be seen in Figure \ref{fig:custom}, 
 the only difference with respect the previous cases is that the new VM image is uploaded into Glance \textbf{REFERENCE HERE TO GLANCE} when needed.
+This image is uploaded with an unique name, 
+created as a combination of the URL hash and its timestamp. 
+This way it becomes trivial to determine whether the requested image has already being uploaded or not. 
 
 \begin{figure}[h]
     \centering
@@ -265,9 +268,6 @@ the only difference with respect the previous cases is that the new VM image is 
     \caption{Sequence diagrams when using user's custom image}%
     \label{fig:custom}%
 \end{figure}
-
-
-
 
 
 \section{Security}
@@ -293,6 +293,36 @@ This is prevented by adding the following setup.
 
 \section{Problems found}
 
+~
+
+Several limitations were found during this investigation.
+Some of these limitations are currently being fixed in the HTCondor source code.
+Deeper understanding of the others may lead to improvements in the overall system.
+
+~
+
+If the communication process with OpenStack by the TRANSLATE hook fails, 
+there is currently a clean way to terminate the job, or to put it in a HOLD state.
+Instead, the Job Router tries again, after 30 seconds, in an virtually infinite loop. 
+
+~
+
+For the mirroring of the classads from the routed job back to the source job, 
+it is required the UPDATE hook to send the whole classad to the stdout. 
+It has been found that actions fail due hidden bugs in the code. 
+
+~
+
+it is not easy to manage a job when its requirements 
+not only can not be satisfied by any node in the backend batch system, 
+but also by any currently available VM image. 
+The solution implemented, as the time being, is to detect that case early in the job cycle management, 
+and create a dedicated route for it. 
+To detect this case, we leverage a feature that allows for the partial creation of the routing table by code.
+This code reads the configuration files with all avaible images types, and builds the logic to identify jobs that do not meet any of those criteria. 
+When this ocurrs, the job is transform in place -and therefore not routed to the backend batch queue-,
+with an extra classad (set\_noroute=True) to prevent it from being considered again for routing.
+This let the job in permanent IDLE status, candidate for removal if also a periodic\_remove expression is added to its classad definition.
 
 \begin{center}
     \colorbox{htcondorbox}{
@@ -305,20 +335,6 @@ This is prevented by adding the following setup.
         \end{minipage}
     }
 \end{center}
-
-\begin{center}
-    \colorbox{htcondorbox}{
-        \begin{minipage}{\textwidth}
-        \small
-            \bf{JOB\_ROUTER\_SOURCE\_JOB\_CONSTRAINT = \newline
-               (target.x509userproxysubject =!= UNDEFINED) \&\& \newline
-               (target.x509UserProxyExpiration =!= UNDEFINED) \&\& \newline
-               (time() \textless \  target.x509UserProxyExpiration)
-            }
-        \end{minipage}
-    }
-\end{center}
-
 
 \begin{center}
     \colorbox{htcondorbox}{
@@ -337,7 +353,60 @@ This is prevented by adding the following setup.
     }
 \end{center}
 
+~
+
+Another problem found is related to the present configuration after installation rather than code design. 
+The HTCondor-CE only allows, by default, jobs being routed in certain ways -more exactly, to certain Job Universes-.
+It is easy to workaround this constrain by overriden the right configuration variable (JOB\_ROUTER\_SOURCE\_SOURCE\_JOB\_CONSTRAINT) removing that specific constrain. 
+
+\begin{center}
+    \colorbox{htcondorbox}{
+        \begin{minipage}{\textwidth}
+        \small
+            \bf{JOB\_ROUTER\_SOURCE\_JOB\_CONSTRAINT = \newline
+               (target.x509userproxysubject =!= UNDEFINED) \&\& \newline
+               (target.x509UserProxyExpiration =!= UNDEFINED) \&\& \newline
+               (time() \textless \  target.x509UserProxyExpiration)
+            }
+        \end{minipage}
+    }
+\end{center}
+
 \section{Future work}
+
+This work can be improved in several ways. 
+
+~
+
+First, it should be straigthforward to expand the same concept to other platforms and not only OpenStack. 
+For example, to AWS \textbf{REFERENCE HERE TO EC2 ???}, or remote clusters using the BOSCO-CE mechanism \textbf{REFERENCE TO BOSCO-CE}.
+
+~
+
+The presetup in the VM images should be avoided, allowing the HTCondor startd to join any arbitrary pool.
+
+~
+
+The job lifecycle management allows for improvements. 
+One possibility is to allow the same VM server to run more than one job, increasing the efficiency of the whole system.
+Another option is to reuse the presented mechanism to elastically expand the size of the local backend batch queue when the jobs waiting time passes some thredshold. 
+
+~
+
+Having more than just one OpenStack user (tenant) is highly recommendable to create policies on user quotas, fair shares mechanisms, accounting and billing. 
+
+~
+
+Removing the need for GSI authentication to submit jobs to the HTCondor-CE is under consideration.
+
+~
+
+It is also being studied a change in the architectural design to prevent the hooks code from interacting themselves with OpenStack.
+Instead, an independent daemon would listen to the hooks requests and execute the corresponding steps. 
+This will prevent from the need to read the configuration files for each job, 
+and also allows for having a single process which holds the state of the entire system, including all jobs, 
+which will facilitate implemented more complex and smarter policies. 
+ 
 
 
 %%\section{Acknowledgements}
