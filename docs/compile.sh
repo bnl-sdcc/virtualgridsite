@@ -13,10 +13,11 @@ f_donload_src(){
 }
 
 f_download_images(){
-    wget -N http://www.usatlas.bnl.gov/~caballer/files/uml/virtualgridsite/opportunistic.png
-    wget -N http://www.usatlas.bnl.gov/~caballer/files/uml/virtualgridsite/dedicated.png
-    wget -N http://www.usatlas.bnl.gov/~caballer/files/uml/virtualgridsite/opportunistic_custom.png
-    wget -N http://www.usatlas.bnl.gov/~caballer/files/uml/virtualgridsite/dedicated_custom.png
+    mkdir images 2>/dev/null
+    wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/uml/virtualgridsite/opportunistic.png
+    wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/uml/virtualgridsite/dedicated.png
+    wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/uml/virtualgridsite/opportunistic_custom.png
+    wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/uml/virtualgridsite/dedicated_custom.png
 }
 
 f_pdflatex(){
