@@ -94,6 +94,8 @@ The technical specifications of the OpenStack cluster used for this prototype ar
 \item EC2 API enabled.
 \end{itemize}
 
+The version of HTCondor was 8.4.8.
+
 
 \section{Prototype description}
 
@@ -104,26 +106,10 @@ instead of any of nodes in the backend batch system,
 we make use of one feature included in the CE: the JobRouter hooks \textbf{MAYBE ADD REFERENCE HERE} \newline
 The Job Router is, by definition, ad add-on that transform jobs from one type to another according to a configurable policy. 
 The Job Router hooks are arbitrary code that can be invoked at some points during the job life cycle.
-Example on how to set HTCondor-CE to use hooks can be seen in \ref{snippet1} 
+%Example on how to set HTCondor-CE to use hooks can be seen in \ref{snippet1} 
 \newline \textbf{?? HOW DO I ADD A CAPTION TO A MINIPAGE OTHER THAN FIGURE ???}
 
-\begin{figure}[h!]
-    \colorbox{htcondorbox}{
-        \begin{minipage}{\textwidth}
-        \small
-            \bf{JOB\_ROUTER\_HOOK\_KEYWORD = NOVA \newline \newline
-                NOVA\_HOOK\_TRANSLATE\_JOB = /usr/share/virtualgridsite/nova\_hook\_translate\_job \newline
-                NOVA\_HOOK\_UPDATE\_JOB\_INFO = /usr/libexec/nova\_hook\_update\_job\_info \newline
-                NOVA\_HOOK\_JOB\_EXIT = /usr/libexec/nova\_hook\_job\_exit \newline
-                NOVA\_HOOK\_JOB\_CLEANUP = /usr/libexec/nova\_hook\_cleanup\_job
-            }
-        \end{minipage}
-    }
-\caption{snippet 1}
-\label{snippet1}
-\end{figure}
-
-%\begin{center}
+%\begin{figure}[h!]
 %    \colorbox{htcondorbox}{
 %        \begin{minipage}{\textwidth}
 %        \small
@@ -135,7 +121,23 @@ Example on how to set HTCondor-CE to use hooks can be seen in \ref{snippet1}
 %            }
 %        \end{minipage}
 %    }
-%\end{center}
+%\caption{snippet 1}
+%\label{snippet1}
+%\end{figure}
+
+\begin{center}
+    \colorbox{htcondorbox}{
+        \begin{minipage}{\textwidth}
+        \small
+            \bf{JOB\_ROUTER\_HOOK\_KEYWORD = NOVA \newline \newline
+                NOVA\_HOOK\_TRANSLATE\_JOB = /usr/share/virtualgridsite/nova\_hook\_translate\_job \newline
+                NOVA\_HOOK\_UPDATE\_JOB\_INFO = /usr/libexec/nova\_hook\_update\_job\_info \newline
+                NOVA\_HOOK\_JOB\_EXIT = /usr/libexec/nova\_hook\_job\_exit \newline
+                NOVA\_HOOK\_JOB\_CLEANUP = /usr/libexec/nova\_hook\_cleanup\_job
+            }
+        \end{minipage}
+    }
+\end{center}
 
 
 
@@ -145,8 +147,45 @@ Example on how to set HTCondor-CE to use hooks can be seen in \ref{snippet1}
 
 The first scenario allows running user's job on an OpenStack server when the job's requirements 
 do not match the characteristics of the nodes in the backend batch system. 
+A typical case is when user's job requires and older version of the operative system, or a newer one. 
+Job's requirements are listed in Table \ref{table:classad1}
 
 
+\begin{table}[h]
+\centering
+\begin{tabular}{ l l }
+  \hline
+  \textbf{job classad} & \textbf{description} \\
+  \hline
+  +opsys & Type of the OS. Example: LINUX  \\
+  +opsysname & Name of OS. Example: CentOS \\
+  +opsysmajorversion & Version of the OS. Example: 7 \\
+  +maxMemory & Amount of RAM memory needed. \\
+  +disk & Hard disk size \\
+  +xcount & Number of cores \\
+  \hline
+\end{tabular}
+\caption{Job's classad}
+\label{table:classad1}
+\end{table}
+
+~
+
+The process is shown in \ref{fig:elastic}. 
+The HTCondor-CE's TRANSLATE hook compares the jobs requirements with a set of configuration files
+compiling the entire list of host profiles available, 
+both in the backend batch system and VM images ready to be used in OpenStack.
+As a result of that comparison, when it decides a new VM server is needed to run the job,
+it requests directly booting it in OpenStack.
+As mentioned, the VMs are prepared to initialize an HTCondor's startd daemon and join the backend pool.
+Once the VM booting process has finished, the TRANSLATE hook finalizes and the source job gets routed to the backend pool,
+with the guarantee that there is now a host that can run it. 
+It also added a new ad-hoc classad to the job with the name assigned to the VM server.
+
+~
+
+The job execution finalization triggers a call to the CLEANUP hook.
+This one will noticed the mentioned custom classad, so it can proceed with the termination of the VM server.
 
 
 \begin{figure}[h]
@@ -157,38 +196,39 @@ do not match the characteristics of the nodes in the backend batch system.
 \end{figure}
 
 
+\subsection{Case 2: interactive usage}
 
-\begin{figure}[h!]
-    \colorbox{htcondorbox}{
-        \begin{minipage}{\textwidth}
-        \small
-            \bf{START\_LOCAL\_UNIVERSE = False  \newline
-                START\_SCHEDULER\_UNIVERSE = \$(START\_LOCAL\_UNIVERSE)
-            }
-        \end{minipage}
-    }
-\caption{snippet 1}
-\label{snippet1}
+In this case, the user knows there is an OpenStack cluster behind the CE, 
+and she actually wants to boot a VM server to login and work interactively.
+There is no payload to be executed in this case.
+
+~
+
+This request for an interactive VM is expressed by adding a special job classad: 
+\begin{center}
+    +virtualgridsite\_interactive\_vm = true
+\end{center}
+
+~
+
+As can be seen in Figure \ref(fig:interactive), when the TRANSLATE hook detects that job classad, 
+it transforms the job in place -so it is not routed into any backend batch queue-,
+and it is converted into an EC2 job \textbf{?? MAYBE ADD HERE A REFERENCE TO THE CONDOR DOC ON EC2 ??} \newline
+This works because, as mentioned, the OpenStack infrastructure has the EC2 API enabled. \textbf{?? REFERENCE TO THE SECTION WHERE THAT WAS MENTIONED ??} \newline
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.4\textwidth]{dedicated.png}
+    \caption{Sequence diagram for the interactive usage case}
+    \label{fig:interactive}
 \end{figure}
 
+In this scenario, it is the routed job, now converted into an EC2 job, 
+the one in charge of requesting the VM instantiation in OpenStack.
+Once that step is completed, the user can read the public IP of that new VM server, and log into it. 
+This IP is available because it is written as a job classad that is set to be mirrored back with the following set
 
-
-\begin{figure}[h!]
-    \colorbox{htcondorbox}{
-        \begin{minipage}{\textwidth}
-        \small
-            \bf{JOB\_ROUTER\_ENTRIES\_CMD = \newline 
-                \hspace*{1cm}/usr/lib/python2.6/site-packages/virtualgridsite/routes.py \newline
-                JOB\_ROUTER\_ENTRIES\_REFRESH = 600
-            }
-        \end{minipage}
-    }
-\caption{snippet 1}
-\label{snippet1}
-\end{figure}
-
-
-\begin{figure}[h!]
+\begin{center}
     \colorbox{htcondorbox}{
         \begin{minipage}{\textwidth}
         \small
@@ -196,51 +236,32 @@ do not match the characteristics of the nodes in the backend batch system.
             }
         \end{minipage}
     }
-\caption{snippet 1}
-\label{snippet1}
-\end{figure}
+\end{center}
+
+Once the user does not have a need for the VM, can issue a \textit{condor\_rm} command, 
+which will make the job to be completed. 
+Once again, that event will be captured by the CLEANUP hook, which will terminate the VM server. 
 
 
-\begin{figure}[h!]
-    \colorbox{htcondorbox}{
-        \begin{minipage}{\textwidth}
-        \small
-            \bf{JOB\_ROUTER\_SOURCE\_JOB\_CONSTRAINT = \newline
-               (target.x509userproxysubject =!= UNDEFINED) \&\& \newline
-               (target.x509UserProxyExpiration =!= UNDEFINED) \&\& \newline
-               (time() \textless \  target.x509UserProxyExpiration)
-            }
-        \end{minipage}
-    }
-\caption{snippet 1}
-\label{snippet1}
-\end{figure}
-
-
-
-
-
-
-
-
-\subsection{Case 2: interactive usage}
-
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.5\textwidth]{dedicated.png}
-    \caption{Sequence diagram for the interactive usage case}
-    \label{fig:interactive}
-\end{figure}
 
 \subsection{Custom virtual machine image}
 
+~
 
-\begin{figure}%
+Users can provide the VM image they need themselves. 
+This is done by passing the URL with the image as a job classad:
+\begin{center}
+    +virtualgridsite\_url = \textless URL with the image \textgreater
+\end{center}
+
+As can be seen in Figure \ref{fig:custom}, 
+the only difference with respect the previous cases is that the new VM image is uploaded into Glance \textbf{REFERENCE HERE TO GLANCE} when needed.
+
+\begin{figure}[h]
     \centering
     \subfloat[elastic case]{{\includegraphics[width=0.45\textwidth]{opportunistic_custom.png} }}%
     \qquad
-    \subfloat[interactive usage]{{\includegraphics[width=0.45\textwidth]{dedicated_custom.png} }}%
+    \subfloat[interactive usage]{{\includegraphics[width=0.42\textwidth]{dedicated_custom.png} }}%
     \caption{Sequence diagrams when using user's custom image}%
     \label{fig:custom}%
 \end{figure}
@@ -251,9 +272,13 @@ do not match the characteristics of the nodes in the backend batch system.
 
 \section{Security}
 
-security blah blah
+~
 
-\begin{figure}[h!]
+As the configuration files, as well the OpenStack credentials files, 
+are placed on the same CE host, it is important to prevent the user's jobs from running on that host.
+This is prevented by adding the following setup.
+
+\begin{center}
     \colorbox{htcondorbox}{
         %\begin{minipage}{0.95\textwidth}
         \begin{minipage}{\textwidth}
@@ -263,16 +288,39 @@ security blah blah
             }
         \end{minipage}
     }
-\caption{snippet 1}
-\label{snippet1}
-\end{figure}
+\end{center}
 
 
 \section{Problems found}
 
-problems blah blah
 
-\begin{figure}[h!]
+\begin{center}
+    \colorbox{htcondorbox}{
+        \begin{minipage}{\textwidth}
+        \small
+            \bf{JOB\_ROUTER\_ENTRIES\_CMD = \newline 
+                \hspace*{1cm}/usr/lib/python2.6/site-packages/virtualgridsite/routes.py \newline
+                JOB\_ROUTER\_ENTRIES\_REFRESH = 600
+            }
+        \end{minipage}
+    }
+\end{center}
+
+\begin{center}
+    \colorbox{htcondorbox}{
+        \begin{minipage}{\textwidth}
+        \small
+            \bf{JOB\_ROUTER\_SOURCE\_JOB\_CONSTRAINT = \newline
+               (target.x509userproxysubject =!= UNDEFINED) \&\& \newline
+               (target.x509UserProxyExpiration =!= UNDEFINED) \&\& \newline
+               (time() \textless \  target.x509UserProxyExpiration)
+            }
+        \end{minipage}
+    }
+\end{center}
+
+
+\begin{center}
     \colorbox{htcondorbox}{
         \begin{minipage}{\textwidth}
         \small
@@ -287,9 +335,7 @@ problems blah blah
             }
         \end{minipage}
     }
-\caption{snippet 1}
-\label{snippet1}
-\end{figure}
+\end{center}
 
 \section{Future work}
 
