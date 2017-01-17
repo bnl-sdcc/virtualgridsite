@@ -44,13 +44,16 @@ This will allow cloud resources to be used without requiring the user to establi
 
 \section{Introduction}
 
-In parallel to the evolution of the Grid Computing technologies, a pletora of virtualization tools and techniques have been developed,
-both in the industry and academia worlds.
-The Grid Computing has reached a high level of maturity on certain aspects, but it lacks some flexibility in others.
-In particular, the type of flexibility that those virtualization tools can offer. 
-For historical reasons the Grid Computing technology has evolved around the needs of the High Energy Physics (HEP) community, 
-which has a very limited set of contrains, but those are in fact almost unavoidable. 
-One example of these contrains is the need for a specific Linux platform to be deployed on the resources part of the HEP-oriented Grid infrastructre.
+In parallel to the evolution of the Grid Computing technologies, a plethora of
+virtualization tools and techniques have been developed, both in industry and academia.
+Grid Computing has reached a high level of maturity in certain aspects, but it
+lacks some flexibility in others.
+In particular, the type of flexibility that virtualization tools can offer. 
+For historical reasons Grid Computing technology has evolved around the needs of the High Energy Physics (HEP) community, 
+which has a very limited set of requirements, but those are in fact almost
+unavoidable. One example of these contraints is the need for a specific Linux
+platform to be deployed on worker node resources within the HEP-oriented
+Grid infrastructure.
 
 ~
 
@@ -59,11 +62,13 @@ but may present a barrier for other scientific communities.
 
 ~
 
-On the another hand, many scientific and academia facilities offer to their employees -or even to external scientist-,
+On the other hand, many scientific and academia facilities offer to their employees -or even to external scientist-,
 the ability to use virtualization platforms. 
 Several of these platforms have become very mature products over the past years \textbf{ADD REFERENCES HERE TO OPENSTACK AND OPENNEBULA, FOR EXAMPLE} \newline
-The usage of these virtualized resources eliminates the contrains in the classic Grid infrastructure, 
-but forces the users to learn how to use them, including getting the client tools and ID accounts. 
+The usage of these virtualized resources eliminates the contraints in the
+classic Grid infrastructure, but forces the users to learn how to use them,
+including installing client tools and getting virtualization-specific
+user accounts.
 
 ~
 
@@ -71,16 +76,19 @@ The goal of this work is to bring both worlds, the Grid Computing and the virtua
 We study how to allow users to submit their grid jobs to a standard Compute Element -the HTCondor-CE in this work-,
 expressing platform requirements that do not necesarily fit the classical HEP-oriented environment.
 Also, we present a mechanism to let users to interact with a virtualization cluster without requiring
-special knowledge, install clients, or request authentication credentials. 
+special knowledge, the installation of virtualization-specific client software,
+or virtualization-specific user credentials.
 
 \subsection{Prototype setup}
 
 ~
 
 The setup for this prototype was simple. 
-All grid identities where mapped at the CE as a single UNIX account, which also corresponded to the unique OpenStack tenant. 
-The backend batch queue was also HTCondor.
-The VM images used in OpenStack had an HTCondor startd preconfigured to join the mentioned backup HTCondor pool. 
+All grid identities were mapped at the CE as a single UNIX account, which
+corresponds to a unique OpenStack tenant.
+The back-end batch system was also HTCondor.
+The VM images used in OpenStack had an HTCondor startd preconfigured to join the
+existing HTCondor pool.
 These startd daemons were also preconfigured to shut down after the first job finished, in order to prevent them from picking more than one job. 
 
 Also, job submission was done one by one.
@@ -96,15 +104,15 @@ The technical specifications of the OpenStack cluster used for this prototype ar
 
 The version of HTCondor was 8.4.8.
 
-
 \section{Prototype description}
 
 ~
 
-In order to allow the HTCondor-CE to dedice when jobs need to be executed on a VM server in OpenStack 
-instead of any of nodes in the backend batch system,
-we make use of one feature included in the CE: the JobRouter hooks \textbf{MAYBE ADD REFERENCE HERE} \newline
-The Job Router is, by definition, ad add-on that transform jobs from one type to another according to a configurable policy. 
+In order to allow the HTCondor-CE to decide when jobs need to be executed on a
+compute server within OpenStack instead of any of nodes in the backend batch
+system, we make use of one feature included in the CE: the JobRouter hooks \textbf{MAYBE ADD REFERENCE HERE} \newline
+The Job Router is, by definition, an add-on that transform jobs from one type to
+another according to a configurable policy.
 The Job Router hooks are arbitrary code that can be invoked at some points during the job life cycle.
 %Example on how to set HTCondor-CE to use hooks can be seen in \ref{snippet1} 
 \newline \textbf{?? HOW DO I ADD A CAPTION TO A MINIPAGE OTHER THAN FIGURE ???}
@@ -145,9 +153,11 @@ The Job Router hooks are arbitrary code that can be invoked at some points durin
 
 ~
 
-The first scenario allows running user's job on an OpenStack server when the job's requirements 
-do not match the characteristics of the nodes in the backend batch system. 
-A typical case is when user's job requires and older version of the operative system, or a newer one. 
+The first scenario allows running user's job within OpenStack when
+the job's requirements do not match the characteristics of the physical nodes in
+the backend batch system.
+A typical case is when user's job requires and older version of the operating
+system, or a newer one.
 Job's requirements are listed in Table \ref{table:classad1}
 
 
@@ -172,20 +182,23 @@ Job's requirements are listed in Table \ref{table:classad1}
 ~
 
 The process is shown in \ref{fig:elastic}. 
-The HTCondor-CE's TRANSLATE hook compares the jobs requirements with a set of configuration files
-compiling the entire list of host profiles available, 
-both in the backend batch system and VM images ready to be used in OpenStack.
-As a result of that comparison, when it decides a new VM server is needed to run the job,
-it requests directly booting it in OpenStack.
-As mentioned, the VMs are prepared to initialize an HTCondor's startd daemon and join the backend pool.
+The HTCondor-CE's TRANSLATE hook compares the job's requirements with a set of
+configuration files compiling the entire list of host profiles available, 
+both in the back-end batch system and VM images ready to be used in OpenStack.
+As a result of that comparison, when it decides a new VM-based worker is needed
+to run the job, it directly requests that OpenStack boot the appropriate VM.
+As mentioned, the VMs are prepared to initialize an HTCondor's startd daemon and
+join the back-end pool.
 Once the VM booting process has finished, the TRANSLATE hook finalizes and the source job gets routed to the backend pool,
 with the guarantee that there is now a host that can run it. 
-It also added a new ad-hoc classad to the job with the name assigned to the VM server.
+It also added a new ad-hoc classad to the job with the name assigned to the VM
+worker.
 
 ~
 
 The job execution finalization triggers a call to the CLEANUP hook.
-This one will noticed the mentioned custom classad, so it can proceed with the termination of the VM server.
+This hook will note the previously mentioned custom classad, and wil then
+proceed with the termination of the VM server.
 
 
 \begin{figure}[h]
@@ -199,8 +212,8 @@ This one will noticed the mentioned custom classad, so it can proceed with the t
 \subsection{Case 2: interactive usage}
 
 In this case, the user knows there is an OpenStack cluster behind the CE, 
-and she actually wants to boot a VM server to login and work interactively.
-There is no payload to be executed in this case.
+and she actually wants to boot a general-purpose VM host to log into and work
+interactively. In this case there is no HTCondor startd on the VM, and there is no payload to be executed in this case.
 
 ~
 
@@ -212,8 +225,8 @@ This request for an interactive VM is expressed by adding a special job classad:
 ~
 
 As can be seen in Figure \ref(fig:interactive), when the TRANSLATE hook detects that job classad, 
-it transforms the job in place -so it is not routed into any backend batch queue-,
-and it is converted into an EC2 job \textbf{?? MAYBE ADD HERE A REFERENCE TO THE CONDOR DOC ON EC2 ??} \newline
+it transforms the job in place -so it is not routed to any back-end batch
+queue-, and it is converted into an EC2 job \textbf{?? MAYBE ADD HERE A REFERENCE TO THE CONDOR DOC ON EC2 ??} \newline
 This works because, as mentioned, the OpenStack infrastructure has the EC2 API enabled. \textbf{?? REFERENCE TO THE SECTION WHERE THAT WAS MENTIONED ??} \newline
 
 \begin{figure}[h]
@@ -224,9 +237,10 @@ This works because, as mentioned, the OpenStack infrastructure has the EC2 API e
 \end{figure}
 
 In this scenario, it is the routed job, now converted into an EC2 job, 
-the one in charge of requesting the VM instantiation in OpenStack.
+which is in charge of requesting the VM instantiation in OpenStack.
 Once that step is completed, the user can read the public IP of that new VM server, and log into it. 
-This IP is available because it is written as a job classad that is set to be mirrored back with the following set
+This IP is available because it is written as a job classad that is set to be
+mirrored back with the following setting
 
 \begin{center}
     \colorbox{htcondorbox}{
@@ -238,18 +252,18 @@ This IP is available because it is written as a job classad that is set to be mi
     }
 \end{center}
 
-Once the user does not have a need for the VM, can issue a \textit{condor\_rm} command, 
-which will make the job to be completed. 
-Once again, that event will be captured by the CLEANUP hook, which will terminate the VM server. 
-
+Once the user no longer wants the VM, she can issue a \textit{condor\_rm}
+command, which will remove the running job. 
+Once again, that event will be captured by the CLEANUP hook, which will execute
+code to terminate the corresponding VM instance.
 
 
 \subsection{Custom virtual machine image}
 
 ~
 
-Users can provide the VM image they need themselves. 
-This is done by passing the URL with the image as a job classad:
+Users can, if they prefer, provide the VM image they need themselves. 
+This is done by passing URL pointing at the VM image as a job classad:
 \begin{center}
     +virtualgridsite\_url = \textless URL with the image \textgreater
 \end{center}
@@ -274,7 +288,7 @@ This way it becomes trivial to determine whether the requested image has already
 
 ~
 
-As the configuration files, as well the OpenStack credentials files, 
+Because the configuration files, as well as the OpenStack credential files, 
 are placed on the same CE host, it is important to prevent the user's jobs from running on that host.
 This is prevented by adding the following setup.
 
@@ -297,32 +311,34 @@ This is prevented by adding the following setup.
 
 Several limitations were found during this investigation.
 Some of these limitations are currently being fixed in the HTCondor source code.
-Deeper understanding of the others may lead to improvements in the overall system.
+Deeper understanding of the others may lead to improvements in the overall
+job-routing system.
 
 ~
 
 If the communication process with OpenStack by the TRANSLATE hook fails, 
-there is currently a clean way to terminate the job, or to put it in a HOLD state.
-Instead, the Job Router tries again, after 30 seconds, in an virtually infinite loop. 
+there is not currently a clean way to terminate the job, or to put it in a HOLD
+state. Instead, the Job Router tries again, after 30 seconds, in an infinite loop.
 
 ~
 
 For the mirroring of the classads from the routed job back to the source job, 
-it is required the UPDATE hook to send the whole classad to the stdout. 
-It has been found that actions fail due hidden bugs in the code. 
+it is required that the UPDATE hook send the whole classad to standard output. 
+It has been found that actions fail due to hidden bugs in the code. 
 
 ~
 
-it is not easy to manage a job when its requirements 
-not only can not be satisfied by any node in the backend batch system, 
-but also by any currently available VM image. 
-The solution implemented, as the time being, is to detect that case early in the job cycle management, 
-and create a dedicated route for it. 
+It is not easy to manage a job when its requirements cannot be satisfied by any
+node in the backend batch system nor any currently available VM image. 
+The solution implemented, for the time being, is to detect that case early in
+the job cycle management, and create a dedicated route for it. 
 To detect this case, we leverage a feature that allows for the partial creation of the routing table by code.
 This code reads the configuration files with all avaible images types, and builds the logic to identify jobs that do not meet any of those criteria. 
-When this ocurrs, the job is transform in place -and therefore not routed to the backend batch queue-,
-with an extra classad (set\_noroute=True) to prevent it from being considered again for routing.
-This let the job in permanent IDLE status, candidate for removal if also a periodic\_remove expression is added to its classad definition.
+When this ocurrs, the job is transformed in place -and therefore not routed to
+the backend batch queue-, with an extra classad (set\_noroute=True) to prevent it from being considered again for routing.
+This leaves the job in permanent IDLE status, making it a candidate for
+explicit removal. It can alos be cleaned up automatically if a
+periodic\_remove expression is added to its classad definition.
 
 \begin{center}
     \colorbox{htcondorbox}{
@@ -357,7 +373,9 @@ This let the job in permanent IDLE status, candidate for removal if also a perio
 
 Another problem found is related to the present configuration after installation rather than code design. 
 The HTCondor-CE only allows, by default, jobs being routed in certain ways -more exactly, to certain Job Universes-.
-It is easy to workaround this constrain by overriden the right configuration variable (JOB\_ROUTER\_SOURCE\_SOURCE\_JOB\_CONSTRAINT) removing that specific constrain. 
+It is easy to workaround this constraint by overriding the right configuration
+variable (JOB\_ROUTER\_SOURCE\_SOURCE\_JOB\_CONSTRAINT), removing that specific
+constraint.
 
 \begin{center}
     \colorbox{htcondorbox}{
@@ -378,8 +396,9 @@ This work can be improved in several ways.
 
 ~
 
-First, it should be straigthforward to expand the same concept to other platforms and not only OpenStack. 
-For example, to AWS \textbf{REFERENCE HERE TO EC2 ???}, or remote clusters using the BOSCO-CE mechanism \textbf{REFERENCE TO BOSCO-CE}.
+First, it should be straigthforward to expand the same concept to other
+platforms beyond OpenStack. For example, to AWS \textbf{REFERENCE HERE TO EC2
+???}, or remote clusters using the BOSCO-CE mechanism \textbf{REFERENCE TO BOSCO-CE}.
 
 ~
 
@@ -388,12 +407,16 @@ The presetup in the VM images should be avoided, allowing the HTCondor startd to
 ~
 
 The job lifecycle management allows for improvements. 
-One possibility is to allow the same VM server to run more than one job, increasing the efficiency of the whole system.
-Another option is to reuse the presented mechanism to elastically expand the size of the local backend batch queue when the jobs waiting time passes some thredshold. 
+One possibility is to allow the same VM worker to run more than one job,
+increasing the efficiency of the whole system. Another option is to reuse the
+presented mechanism to elastically expand the size of the local back-end batch
+queue when the jobs waiting time passes some threshold.
 
 ~
 
-Having more than just one OpenStack user (tenant) is highly recommendable to create policies on user quotas, fair shares mechanisms, accounting and billing. 
+Having more than just one OpenStack user (tenant) is highly recommended to allow
+the usage of user quotas, fair share mechanisms, and to enable per-tenant
+accounting and billing.
 
 ~
 
@@ -401,11 +424,13 @@ Removing the need for GSI authentication to submit jobs to the HTCondor-CE is un
 
 ~
 
-It is also being studied a change in the architectural design to prevent the hooks code from interacting themselves with OpenStack.
-Instead, an independent daemon would listen to the hooks requests and execute the corresponding steps. 
-This will prevent from the need to read the configuration files for each job, 
-and also allows for having a single process which holds the state of the entire system, including all jobs, 
-which will facilitate implemented more complex and smarter policies. 
+We are also considering a change in the architectural design to prevent the
+hooks code from interacting directly with OpenStack. Instead, an independent
+daemon would listen to the hooks' requests and execute the corresponding steps.
+This will avoid the need to re-read the configuration files for each job, 
+and also allows for having a single process which holds the state of the entire
+system, including all jobs. This centralization could facilitate the
+implementation of more complex and smarter policies.
  
 
 
