@@ -25,6 +25,9 @@ f_download_images(){
     wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/figures/virtualgridsite/snippet4.png
     wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/figures/virtualgridsite/snippet5.png
     wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/figures/virtualgridsite/snippet6.png
+
+    wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/figures/virtualgridsite/newfloat.sty
+
 }
 
 f_pdflatex(){

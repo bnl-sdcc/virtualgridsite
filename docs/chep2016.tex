@@ -7,6 +7,8 @@
 \usepackage{xcolor}
 \definecolor{htcondorbox}{RGB}{200,200,200}
 \usepackage{lineno}
+\usepackage{newfloat}
+\DeclareFloatingEnvironment[fileext=lop]{snippet}
 \linenumbers
 
 
@@ -146,12 +148,15 @@ The Job Router hooks are arbitrary code that can be invoked at some points durin
 %    }
 %\end{center}
 
-\begin{figure}[h]
+%\begin{figure}[h]
+\begin{snippet}[h]
+    \renewcommand\figurename{Snippet}
     \centering
     \includegraphics[width=0.95\textwidth]{snippet1.png}
     \caption{Snippet 1}
     \label{fig:snippet1}
-\end{figure}
+\end{snippet}
+%\end{figure}
 
 
 \subsection{Case 1: elastic expansion}
@@ -247,12 +252,15 @@ Once that step is completed, the user can read the public IP of that new VM serv
 This IP is available because it is written as a job classad that is set to be
 mirrored back with the following setting
 
-\begin{figure}[h]
+%\begin{figure}[h]
+\begin{snippet}[h]
     \centering
+    \renewcommand\figurename{Snippet}
     \includegraphics[width=0.95\textwidth]{snippet2.png}
     \caption{Snippet 2}
     \label{fig:snippet2}
-\end{figure}
+\end{snippet}
+%\end{figure}
 
 %\begin{center}
 %    \colorbox{htcondorbox}{
@@ -305,12 +313,15 @@ are placed on the same CE host, it is important to prevent the user's jobs from 
 This is prevented by adding the following setup.
 
 
-\begin{figure}[h]
+%\begin{figure}[h]
+\begin{snippet}[h]
     \centering
+    \renewcommand\figurename{Snippet}
     \includegraphics[width=0.95\textwidth]{snippet3.png}
     \caption{Snippet 3}
     \label{fig:snippet3}
-\end{figure}
+\end{snippet}
+%\end{figure}
 
 %\begin{center}
 %    \colorbox{htcondorbox}{
@@ -360,12 +371,15 @@ This leaves the job in permanent IDLE status, making it a candidate for
 explicit removal. It can alos be cleaned up automatically if a
 periodic\_remove expression is added to its classad definition.
 
-\begin{figure}[h]
+%\begin{figure}[h]
+\begin{snippet}[h]
     \centering
+    \renewcommand\figurename{Snippet}
     \includegraphics[width=0.95\textwidth]{snippet4.png}
     \caption{Snippet 4}
     \label{fig:snippet4}
-\end{figure}
+\end{snippet}
+%\end{figure}
 
 %\begin{center}
 %    \colorbox{htcondorbox}{
@@ -379,12 +393,15 @@ periodic\_remove expression is added to its classad definition.
 %    }
 %\end{center}
 
-\begin{figure}[h]
+%\begin{figure}[h]
+\begin{snippet}[h]
     \centering
+    \renewcommand\figurename{Snippet}
     \includegraphics[width=0.95\textwidth]{snippet5.png}
     \caption{Snippet 5}
     \label{fig:snippet5}
-\end{figure}
+\end{snippet}
+%\end{figure}
 
 %\begin{center}
 %    \colorbox{htcondorbox}{
@@ -411,12 +428,15 @@ It is easy to workaround this constraint by overriding the right configuration
 variable (JOB\_ROUTER\_SOURCE\_SOURCE\_JOB\_CONSTRAINT), removing that specific
 constraint.
 
-\begin{figure}[h]
+%\begin{figure}[h]
+\begin{snippet}[h]
     \centering
+    \renewcommand\figurename{Snippet}
     \includegraphics[width=0.95\textwidth]{snippet6.png}
     \caption{Snippet 6}
     \label{fig:snippet6}
-\end{figure}
+\end{snippet}
+%\end{figure}
 
 %\begin{center}
 %    \colorbox{htcondorbox}{
