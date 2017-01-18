@@ -18,6 +18,13 @@ f_download_images(){
     wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/uml/virtualgridsite/dedicated.png
     wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/uml/virtualgridsite/opportunistic_custom.png
     wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/uml/virtualgridsite/dedicated_custom.png
+
+    wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/figures/virtualgridsite/snippet1.png
+    wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/figures/virtualgridsite/snippet2.png
+    wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/figures/virtualgridsite/snippet3.png
+    wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/figures/virtualgridsite/snippet4.png
+    wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/figures/virtualgridsite/snippet5.png
+    wget -P images -N http://www.usatlas.bnl.gov/~caballer/files/figures/virtualgridsite/snippet6.png
 }
 
 f_pdflatex(){

@@ -111,11 +111,10 @@ The version of HTCondor was 8.4.8.
 In order to allow the HTCondor-CE to decide when jobs need to be executed on a
 compute server within OpenStack instead of any of nodes in the backend batch
 system, we make use of one feature included in the CE: the JobRouter hooks \textbf{MAYBE ADD REFERENCE HERE} \newline
-The Job Router is, by definition, an add-on that transform jobs from one type to
+The Job Router is, by definition, an add-on that transforms jobs from one type to
 another according to a configurable policy.
 The Job Router hooks are arbitrary code that can be invoked at some points during the job life cycle.
 %Example on how to set HTCondor-CE to use hooks can be seen in \ref{snippet1} 
-\newline \textbf{?? HOW DO I ADD A CAPTION TO A MINIPAGE OTHER THAN FIGURE ???}
 
 %\begin{figure}[h!]
 %    \colorbox{htcondorbox}{
@@ -133,20 +132,26 @@ The Job Router hooks are arbitrary code that can be invoked at some points durin
 %\label{snippet1}
 %\end{figure}
 
-\begin{center}
-    \colorbox{htcondorbox}{
-        \begin{minipage}{\textwidth}
-        \small
-            \bf{JOB\_ROUTER\_HOOK\_KEYWORD = NOVA \newline \newline
-                NOVA\_HOOK\_TRANSLATE\_JOB = /usr/share/virtualgridsite/nova\_hook\_translate\_job \newline
-                NOVA\_HOOK\_UPDATE\_JOB\_INFO = /usr/libexec/nova\_hook\_update\_job\_info \newline
-                NOVA\_HOOK\_JOB\_EXIT = /usr/libexec/nova\_hook\_job\_exit \newline
-                NOVA\_HOOK\_JOB\_CLEANUP = /usr/libexec/nova\_hook\_cleanup\_job
-            }
-        \end{minipage}
-    }
-\end{center}
+%\begin{center}
+%    \colorbox{htcondorbox}{
+%        \begin{minipage}{\textwidth}
+%        \small
+%            \bf{JOB\_ROUTER\_HOOK\_KEYWORD = NOVA \newline \newline
+%                NOVA\_HOOK\_TRANSLATE\_JOB = /usr/share/virtualgridsite/nova\_hook\_translate\_job \newline
+%                NOVA\_HOOK\_UPDATE\_JOB\_INFO = /usr/libexec/nova\_hook\_update\_job\_info \newline
+%                NOVA\_HOOK\_JOB\_EXIT = /usr/libexec/nova\_hook\_job\_exit \newline
+%                NOVA\_HOOK\_JOB\_CLEANUP = /usr/libexec/nova\_hook\_cleanup\_job
+%            }
+%        \end{minipage}
+%    }
+%\end{center}
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\textwidth]{snippet1.png}
+    \caption{Snippet 1}
+    \label{fig:snippet1}
+\end{figure}
 
 
 \subsection{Case 1: elastic expansion}
@@ -242,15 +247,22 @@ Once that step is completed, the user can read the public IP of that new VM serv
 This IP is available because it is written as a job classad that is set to be
 mirrored back with the following setting
 
-\begin{center}
-    \colorbox{htcondorbox}{
-        \begin{minipage}{\textwidth}
-        \small
-            \bf{NOVA\_ATTRS\_TO\_COPY = EC2ElasticIP
-            }
-        \end{minipage}
-    }
-\end{center}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\textwidth]{snippet2.png}
+    \caption{Snippet 2}
+    \label{fig:snippet2}
+\end{figure}
+
+%\begin{center}
+%    \colorbox{htcondorbox}{
+%        \begin{minipage}{\textwidth}
+%        \small
+%            \bf{NOVA\_ATTRS\_TO\_COPY = EC2ElasticIP
+%            }
+%        \end{minipage}
+%    }
+%\end{center}
 
 Once the user no longer wants the VM, she can issue a \textit{condor\_rm}
 command, which will remove the running job. 
@@ -292,17 +304,25 @@ Because the configuration files, as well as the OpenStack credential files,
 are placed on the same CE host, it is important to prevent the user's jobs from running on that host.
 This is prevented by adding the following setup.
 
-\begin{center}
-    \colorbox{htcondorbox}{
-        %\begin{minipage}{0.95\textwidth}
-        \begin{minipage}{\textwidth}
-        \small
-            \bf{START\_LOCAL\_UNIVERSE = False \newline
-                START\_SCHEDULER\_UNIVERSE = \$(START\_LOCAL\_UNIVERSE)
-            }
-        \end{minipage}
-    }
-\end{center}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\textwidth]{snippet3.png}
+    \caption{Snippet 3}
+    \label{fig:snippet3}
+\end{figure}
+
+%\begin{center}
+%    \colorbox{htcondorbox}{
+%        %\begin{minipage}{0.95\textwidth}
+%        \begin{minipage}{\textwidth}
+%        \small
+%            \bf{START\_LOCAL\_UNIVERSE = False \newline
+%                START\_SCHEDULER\_UNIVERSE = \$(START\_LOCAL\_UNIVERSE)
+%            }
+%        \end{minipage}
+%    }
+%\end{center}
 
 
 \section{Problems found}
@@ -340,34 +360,48 @@ This leaves the job in permanent IDLE status, making it a candidate for
 explicit removal. It can alos be cleaned up automatically if a
 periodic\_remove expression is added to its classad definition.
 
-\begin{center}
-    \colorbox{htcondorbox}{
-        \begin{minipage}{\textwidth}
-        \small
-            \bf{JOB\_ROUTER\_ENTRIES\_CMD = \newline 
-                \hspace*{1cm}/usr/lib/python2.6/site-packages/virtualgridsite/routes.py \newline
-                JOB\_ROUTER\_ENTRIES\_REFRESH = 600
-            }
-        \end{minipage}
-    }
-\end{center}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\textwidth]{snippet4.png}
+    \caption{Snippet 4}
+    \label{fig:snippet4}
+\end{figure}
 
-\begin{center}
-    \colorbox{htcondorbox}{
-        \begin{minipage}{\textwidth}
-        \small
-            \bf{[
-                 Name = "No\_route";  \newline
-                 EditJobInPlace = true; \newline
-                 set\_noreroute = "True"; \newline
-                 Requirements = TARGET.noreroute is undefined \&\& \textless node requirements\textgreater;  \newline
-                 set\_PeriodicRemove = ( JobStatus == 1 \&\& ( time() - EnteredCurrentStatus ) \textgreater \ 10 ); \newline
-                 TargetUniverse = 5 \newline
-                 ]
-            }
-        \end{minipage}
-    }
-\end{center}
+%\begin{center}
+%    \colorbox{htcondorbox}{
+%        \begin{minipage}{\textwidth}
+%        \small
+%            \bf{JOB\_ROUTER\_ENTRIES\_CMD = \newline 
+%                \hspace*{1cm}/usr/lib/python2.6/site-packages/virtualgridsite/routes.py \newline
+%                JOB\_ROUTER\_ENTRIES\_REFRESH = 600
+%            }
+%        \end{minipage}
+%    }
+%\end{center}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\textwidth]{snippet5.png}
+    \caption{Snippet 5}
+    \label{fig:snippet5}
+\end{figure}
+
+%\begin{center}
+%    \colorbox{htcondorbox}{
+%        \begin{minipage}{\textwidth}
+%        \small
+%            \bf{[
+%                 Name = "No\_route";  \newline
+%                 EditJobInPlace = true; \newline
+%                 set\_noreroute = "True"; \newline
+%                 Requirements = TARGET.noreroute is undefined \&\& \textless node requirements\textgreater;  \newline
+%                 set\_PeriodicRemove = ( JobStatus == 1 \&\& ( time() - EnteredCurrentStatus ) \textgreater \ 10 ); \newline
+%                 TargetUniverse = 5 \newline
+%                 ]
+%            }
+%        \end{minipage}
+%    }
+%\end{center}
 
 ~
 
@@ -377,18 +411,25 @@ It is easy to workaround this constraint by overriding the right configuration
 variable (JOB\_ROUTER\_SOURCE\_SOURCE\_JOB\_CONSTRAINT), removing that specific
 constraint.
 
-\begin{center}
-    \colorbox{htcondorbox}{
-        \begin{minipage}{\textwidth}
-        \small
-            \bf{JOB\_ROUTER\_SOURCE\_JOB\_CONSTRAINT = \newline
-               (target.x509userproxysubject =!= UNDEFINED) \&\& \newline
-               (target.x509UserProxyExpiration =!= UNDEFINED) \&\& \newline
-               (time() \textless \  target.x509UserProxyExpiration)
-            }
-        \end{minipage}
-    }
-\end{center}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\textwidth]{snippet6.png}
+    \caption{Snippet 6}
+    \label{fig:snippet6}
+\end{figure}
+
+%\begin{center}
+%    \colorbox{htcondorbox}{
+%        \begin{minipage}{\textwidth}
+%        \small
+%            \bf{JOB\_ROUTER\_SOURCE\_JOB\_CONSTRAINT = \newline
+%               (target.x509userproxysubject =!= UNDEFINED) \&\& \newline
+%               (target.x509UserProxyExpiration =!= UNDEFINED) \&\& \newline
+%               (time() \textless \  target.x509UserProxyExpiration)
+%            }
+%        \end{minipage}
+%    }
+%\end{center}
 
 \section{Future work}
 
