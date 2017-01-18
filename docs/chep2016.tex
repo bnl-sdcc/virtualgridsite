@@ -66,7 +66,8 @@ but may present a barrier for other scientific communities.
 
 On the other hand, many scientific and academia facilities offer to their employees -or even to external scientist-,
 the ability to use virtualization platforms. 
-Several of these platforms have become very mature products over the past years \textbf{ADD REFERENCES HERE TO OPENSTACK AND OPENNEBULA, FOR EXAMPLE} \newline
+Several of these platforms have become very mature products over the past years.
+Some very popular examples are OpenNebula \cite{opennebula} and OpenStack \cite{openstack}.
 The usage of these virtualized resources eliminates the contraints in the
 classic Grid infrastructure, but forces the users to learn how to use them,
 including installing client tools and getting virtualization-specific
@@ -75,20 +76,20 @@ user accounts.
 ~
 
 The goal of this work is to bring both worlds, the Grid Computing and the virtualization, closer to each other. 
-We study how to allow users to submit their grid jobs to a standard Compute Element -the HTCondor-CE in this work-,
+We study how to allow users to submit their grid jobs to a standard Compute Element -the HTCondor-CE \cite{condorce} in this work-,
 expressing platform requirements that do not necesarily fit the classical HEP-oriented environment.
 Also, we present a mechanism to let users to interact with a virtualization cluster without requiring
 special knowledge, the installation of virtualization-specific client software,
 or virtualization-specific user credentials.
 
-\subsection{Prototype setup}
+\subsection{Prototype setup} \label{prototype}
 
 ~
 
 The setup for this prototype was simple. 
 All grid identities were mapped at the CE as a single UNIX account, which
 corresponds to a unique OpenStack tenant.
-The back-end batch system was also HTCondor.
+The back-end batch system was also HTCondor \cite{condor}.
 The VM images used in OpenStack had an HTCondor startd preconfigured to join the
 existing HTCondor pool.
 These startd daemons were also preconfigured to shut down after the first job finished, in order to prevent them from picking more than one job. 
@@ -112,11 +113,11 @@ The version of HTCondor was 8.4.8.
 
 In order to allow the HTCondor-CE to decide when jobs need to be executed on a
 compute server within OpenStack instead of any of nodes in the backend batch
-system, we make use of one feature included in the CE: the JobRouter hooks \textbf{MAYBE ADD REFERENCE HERE} \newline
+system, we make use of one feature included in the CE: the JobRouter hooks \cite{jobrouter} \newline
 The Job Router is, by definition, an add-on that transforms jobs from one type to
 another according to a configurable policy.
 The Job Router hooks are arbitrary code that can be invoked at some points during the job life cycle.
-%Example on how to set HTCondor-CE to use hooks can be seen in \ref{snippet1} 
+Example on how to set HTCondor-CE to use hooks can be seen in Snippet \ref{snip:snippet1} 
 
 %\begin{figure}[h!]
 %    \colorbox{htcondorbox}{
@@ -153,8 +154,8 @@ The Job Router hooks are arbitrary code that can be invoked at some points durin
     \renewcommand\figurename{Snippet}
     \centering
     \includegraphics[width=0.95\textwidth]{snippet1.png}
-    \caption{Snippet 1}
-    \label{fig:snippet1}
+    \caption{example of HTCondor-CE setup for hooks}
+    \label{snip:snippet1}
 \end{snippet}
 %\end{figure}
 
@@ -234,10 +235,10 @@ This request for an interactive VM is expressed by adding a special job classad:
 
 ~
 
-As can be seen in Figure \ref(fig:interactive), when the TRANSLATE hook detects that job classad, 
+As can be seen in Figure \ref{fig:interactive}, when the TRANSLATE hook detects that job classad, 
 it transforms the job in place -so it is not routed to any back-end batch
-queue-, and it is converted into an EC2 job \textbf{?? MAYBE ADD HERE A REFERENCE TO THE CONDOR DOC ON EC2 ??} \newline
-This works because, as mentioned, the OpenStack infrastructure has the EC2 API enabled. \textbf{?? REFERENCE TO THE SECTION WHERE THAT WAS MENTIONED ??} \newline
+queue-, and it is converted into an EC2 job \cite{condorec2}.
+This works because, as mentioned in section \ref{prototype}, the OpenStack infrastructure has the EC2 API enabled. 
 
 \begin{figure}[h]
     \centering
@@ -257,8 +258,8 @@ mirrored back with the following setting
     \centering
     \renewcommand\figurename{Snippet}
     \includegraphics[width=0.95\textwidth]{snippet2.png}
-    \caption{Snippet 2}
-    \label{fig:snippet2}
+    \caption{Setup for classads to be transferred}
+    \label{snip:snippet2}
 \end{snippet}
 %\end{figure}
 
@@ -289,7 +290,7 @@ This is done by passing URL pointing at the VM image as a job classad:
 \end{center}
 
 As can be seen in Figure \ref{fig:custom}, 
-the only difference with respect the previous cases is that the new VM image is uploaded into Glance \textbf{REFERENCE HERE TO GLANCE} when needed.
+the only difference with respect the previous cases is that the new VM image is uploaded into Glance -the OpenStack image service- when needed.
 This image is uploaded with an unique name, 
 created as a combination of the URL hash and its timestamp. 
 This way it becomes trivial to determine whether the requested image has already being uploaded or not. 
@@ -318,8 +319,8 @@ This is prevented by adding the following setup.
     \centering
     \renewcommand\figurename{Snippet}
     \includegraphics[width=0.95\textwidth]{snippet3.png}
-    \caption{Snippet 3}
-    \label{fig:snippet3}
+    \caption{Setup to prevent user's jobs being forked at the HTCondor-CE host}
+    \label{snip:snippet3}
 \end{snippet}
 %\end{figure}
 
@@ -368,7 +369,7 @@ This code reads the configuration files with all avaible images types, and build
 When this ocurrs, the job is transformed in place -and therefore not routed to
 the backend batch queue-, with an extra classad (set\_noroute=True) to prevent it from being considered again for routing.
 This leaves the job in permanent IDLE status, making it a candidate for
-explicit removal. It can alos be cleaned up automatically if a
+explicit removal. It can also be cleaned up automatically if a
 periodic\_remove expression is added to its classad definition.
 
 %\begin{figure}[h]
@@ -376,8 +377,8 @@ periodic\_remove expression is added to its classad definition.
     \centering
     \renewcommand\figurename{Snippet}
     \includegraphics[width=0.95\textwidth]{snippet4.png}
-    \caption{Snippet 4}
-    \label{fig:snippet4}
+    \caption{location of code with routing policies}
+    \label{snip:snippet4}
 \end{snippet}
 %\end{figure}
 
@@ -398,8 +399,8 @@ periodic\_remove expression is added to its classad definition.
     \centering
     \renewcommand\figurename{Snippet}
     \includegraphics[width=0.95\textwidth]{snippet5.png}
-    \caption{Snippet 5}
-    \label{fig:snippet5}
+    \caption{Example of routing table to manage jobs with requirements that cannot be satisfied}
+    \label{snip:snippet5}
 \end{snippet}
 %\end{figure}
 
@@ -433,8 +434,8 @@ constraint.
     \centering
     \renewcommand\figurename{Snippet}
     \includegraphics[width=0.95\textwidth]{snippet6.png}
-    \caption{Snippet 6}
-    \label{fig:snippet6}
+    \caption{overriding the default Job Router constrains}
+    \label{snip:snippet6}
 \end{snippet}
 %\end{figure}
 
@@ -458,8 +459,8 @@ This work can be improved in several ways.
 ~
 
 First, it should be straigthforward to expand the same concept to other
-platforms beyond OpenStack. For example, to AWS \textbf{REFERENCE HERE TO EC2
-???}, or remote clusters using the BOSCO-CE mechanism \textbf{REFERENCE TO BOSCO-CE}.
+platforms beyond OpenStack. For example, to AWS, 
+or remote clusters using the BOSCO-CE mechanism.
 
 ~
 
