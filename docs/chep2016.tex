@@ -50,7 +50,7 @@ This will allow cloud resources to be used without requiring the user to establi
 ~
 
 In parallel to the evolution of the Grid Computing technologies, a plethora of
-virtualization tools and techniques have been developed, both in industry and academia.
+virtualization tools and techniques has been developed, both in industry and academia.
 Grid Computing has reached a high level of maturity in certain aspects, but it
 lacks some flexibility in others.
 In particular, the type of flexibility that virtualization tools can offer. 
@@ -91,7 +91,7 @@ or virtualization-specific user credentials.
 
 The setup for this prototype was simple. 
 All grid identities were mapped at the CE as a single UNIX account, which
-corresponds to a unique OpenStack tenant.
+corresponds to an unique OpenStack tenant.
 The back-end batch system was also HTCondor \cite{condor}.
 The VM images used in OpenStack had an HTCondor startd preconfigured to join the
 existing HTCondor pool.
@@ -298,10 +298,10 @@ code to terminate the corresponding VM instance.
 
 ~
 
-Users can, if they prefer, provide the VM image they need themselves. 
-This is done by passing an URL pointing at the VM image as a job classad:
+Users can, if they prefer, provide their own VM images. 
+This is done by passing an URL pointing at the image as a job classad:
 \begin{center}
-    +virtualgridsite\_url = \textless URL with the image\textgreater
+    +virtualgridsite\_url = \textless URL with the VM image\textgreater
 \end{center}
 
 As can be seen in Figure \ref{fig:custom}, 
