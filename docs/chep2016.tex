@@ -7,6 +7,7 @@
 \usepackage{xcolor}
 \definecolor{htcondorbox}{RGB}{200,200,200}
 \usepackage{lineno}
+\usepackage{float}
 \usepackage{newfloat}
 \DeclareFloatingEnvironment[fileext=lop]{snippet}
 \linenumbers
@@ -46,14 +47,16 @@ This will allow cloud resources to be used without requiring the user to establi
 
 \section{Introduction}
 
+~
+
 In parallel to the evolution of the Grid Computing technologies, a plethora of
 virtualization tools and techniques have been developed, both in industry and academia.
 Grid Computing has reached a high level of maturity in certain aspects, but it
 lacks some flexibility in others.
 In particular, the type of flexibility that virtualization tools can offer. 
-For historical reasons Grid Computing technology has evolved around the needs of the High Energy Physics (HEP) community, 
-which has a very limited set of requirements, but those are in fact almost
-unavoidable. One example of these contraints is the need for a specific Linux
+For historical reasons Grid Computing technology has evolved around the needs of the High Energy Physics (HEP) community.
+This HEP community has a very limited set of computing requirements, but they are in fact almost unavoidable. 
+One example of these contraints is the need for a specific Linux
 platform to be deployed on worker node resources within the HEP-oriented
 Grid infrastructure.
 
@@ -64,7 +67,7 @@ but may present a barrier for other scientific communities.
 
 ~
 
-On the other hand, many scientific and academia facilities offer to their employees -or even to external scientist-,
+On the other hand, many scientific and academia facilities offer to their employees -or even to external scientists-,
 the ability to use virtualization platforms. 
 Several of these platforms have become very mature products over the past years.
 Some very popular examples are OpenNebula \cite{opennebula} and OpenStack \cite{openstack}.
@@ -92,11 +95,13 @@ corresponds to a unique OpenStack tenant.
 The back-end batch system was also HTCondor \cite{condor}.
 The VM images used in OpenStack had an HTCondor startd preconfigured to join the
 existing HTCondor pool.
-These startd daemons were also preconfigured to shut down after the first job finished, in order to prevent them from picking more than one job. 
-
+These startd daemons were also preconfigured to shut down after the first job finished, 
+in order to prevent them from picking more than one job during this study.
 Also, job submission was done one by one.
 
-The technical specifications of the OpenStack cluster used for this prototype are as listed 
+~
+
+The technical specifications of the OpenStack cluster used for this prototype are as listed: 
 
 \begin{itemize}
 \item OpenStack instance: Icehouse.
@@ -105,6 +110,8 @@ The technical specifications of the OpenStack cluster used for this prototype ar
 \item EC2 API enabled.
 \end{itemize}
 
+~
+
 The version of HTCondor was 8.4.8.
 
 \section{Prototype description}
@@ -112,12 +119,15 @@ The version of HTCondor was 8.4.8.
 ~
 
 In order to allow the HTCondor-CE to decide when jobs need to be executed on a
-compute server within OpenStack instead of any of nodes in the backend batch
-system, we make use of one feature included in the CE: the JobRouter hooks \cite{jobrouter} \newline
+compute server within OpenStack instead of any of nodes in the back-end batch
+system, we make use of one feature included in the CE: the Job Router hooks \cite{jobrouter}.
+
+~
+
 The Job Router is, by definition, an add-on that transforms jobs from one type to
 another according to a configurable policy.
 The Job Router hooks are arbitrary code that can be invoked at some points during the job life cycle.
-Example on how to set HTCondor-CE to use hooks can be seen in Snippet \ref{snip:snippet1} 
+Example on how to set HTCondor-CE to use hooks can be seen in Snippet \ref{snip:snippet1}.
 
 %\begin{figure}[h!]
 %    \colorbox{htcondorbox}{
@@ -141,9 +151,10 @@ Example on how to set HTCondor-CE to use hooks can be seen in Snippet \ref{snip:
 %        \small
 %            \bf{JOB\_ROUTER\_HOOK\_KEYWORD = NOVA \newline \newline
 %                NOVA\_HOOK\_TRANSLATE\_JOB = /usr/share/virtualgridsite/nova\_hook\_translate\_job \newline
-%                NOVA\_HOOK\_UPDATE\_JOB\_INFO = /usr/libexec/nova\_hook\_update\_job\_info \newline
-%                NOVA\_HOOK\_JOB\_EXIT = /usr/libexec/nova\_hook\_job\_exit \newline
-%                NOVA\_HOOK\_JOB\_CLEANUP = /usr/libexec/nova\_hook\_cleanup\_job
+%                NOVA\_HOOK\_UPDATE\_JOB\_INFO = \newline      
+%                \hspace*{1cm} /usr/share/virtualgridsite/nova\_hook\_update\_job\_info \newline
+%                NOVA\_HOOK\_JOB\_EXIT = /usr/share/virtualgridsite/nova\_hook\_job\_exit \newline
+%                NOVA\_HOOK\_JOB\_CLEANUP = /usr/share/virtualgridsite/nova\_hook\_cleanup\_job
 %            }
 %        \end{minipage}
 %    }
@@ -154,7 +165,7 @@ Example on how to set HTCondor-CE to use hooks can be seen in Snippet \ref{snip:
     \renewcommand\figurename{Snippet}
     \centering
     \includegraphics[width=0.95\textwidth]{snippet1.png}
-    \caption{example of HTCondor-CE setup for hooks}
+    \caption{example of HTCondor-CE configuration for the Job Router hooks. virtualgridsite is the name of the package with this prototype.}
     \label{snip:snippet1}
 \end{snippet}
 %\end{figure}
@@ -166,13 +177,13 @@ Example on how to set HTCondor-CE to use hooks can be seen in Snippet \ref{snip:
 
 The first scenario allows running user's job within OpenStack when
 the job's requirements do not match the characteristics of the physical nodes in
-the backend batch system.
+the back-end batch system.
 A typical case is when user's job requires and older version of the operating
 system, or a newer one.
-Job's requirements are listed in Table \ref{table:classad1}
+Table \ref{table:classad1} shows a list of HTCondor classads defined for this purpose.
 
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \begin{tabular}{ l l }
   \hline
@@ -186,22 +197,22 @@ Job's requirements are listed in Table \ref{table:classad1}
   +xcount & Number of cores \\
   \hline
 \end{tabular}
-\caption{Job's classad}
+\caption{Job's classads for worker node requirements.}
 \label{table:classad1}
 \end{table}
 
 ~
 
-The process is shown in \ref{fig:elastic}. 
+The process is shown in Figure \ref{fig:elastic}. 
 The HTCondor-CE's TRANSLATE hook compares the job's requirements with a set of
-configuration files compiling the entire list of host profiles available, 
+configuration files compiling the entire list of available host profiles, 
 both in the back-end batch system and VM images ready to be used in OpenStack.
 As a result of that comparison, when it decides a new VM-based worker is needed
-to run the job, it directly requests that OpenStack boot the appropriate VM.
+to run the job, it directly requests that OpenStack boots the appropriate VM.
 As mentioned, the VMs are prepared to initialize an HTCondor's startd daemon and
 join the back-end pool.
-Once the VM booting process has finished, the TRANSLATE hook finalizes and the source job gets routed to the backend pool,
-with the guarantee that there is now a host that can run it. 
+Once the VM booting process has finished, the TRANSLATE hook finalizes and the source job gets routed to the back-end pool,
+with the guarantee that there is now a host that can execute it. 
 It also added a new ad-hoc classad to the job with the name assigned to the VM
 worker.
 
@@ -209,7 +220,7 @@ worker.
 
 The job execution finalization triggers a call to the CLEANUP hook.
 This hook will note the previously mentioned custom classad, and wil then
-proceed with the termination of the VM server.
+proceed with the termination of that particular VM instance.
 
 
 \begin{figure}[h]
@@ -222,9 +233,12 @@ proceed with the termination of the VM server.
 
 \subsection{Case 2: interactive usage}
 
+~
+
 In this case, the user knows there is an OpenStack cluster behind the CE, 
 and she actually wants to boot a general-purpose VM host to log into and work
-interactively. In this case there is no HTCondor startd on the VM, and there is no payload to be executed in this case.
+interactively. 
+In this case there is neither an HTCondor startd on the VM nor a payload to be executed.
 
 ~
 
@@ -238,7 +252,7 @@ This request for an interactive VM is expressed by adding a special job classad:
 As can be seen in Figure \ref{fig:interactive}, when the TRANSLATE hook detects that job classad, 
 it transforms the job in place -so it is not routed to any back-end batch
 queue-, and it is converted into an EC2 job \cite{condorec2}.
-This works because, as mentioned in section \ref{prototype}, the OpenStack infrastructure has the EC2 API enabled. 
+This is possible because, as mentioned in section \ref{prototype}, the OpenStack infrastructure has the EC2 API enabled. 
 
 \begin{figure}[h]
     \centering
@@ -247,18 +261,19 @@ This works because, as mentioned in section \ref{prototype}, the OpenStack infra
     \label{fig:interactive}
 \end{figure}
 
+~
+
 In this scenario, it is the routed job, now converted into an EC2 job, 
-which is in charge of requesting the VM instantiation in OpenStack.
+the one in charge of requesting the VM instantiation in OpenStack.
 Once that step is completed, the user can read the public IP of that new VM server, and log into it. 
-This IP is available because it is written as a job classad that is set to be
-mirrored back with the following setting
+This IP is available because it is stored in a job classad set to be mirrored back with the setting in Snippet \ref{snip:snippet2}.
 
 %\begin{figure}[h]
 \begin{snippet}[h]
     \centering
     \renewcommand\figurename{Snippet}
     \includegraphics[width=0.95\textwidth]{snippet2.png}
-    \caption{Setup for classads to be transferred}
+    \caption{Setup for a classad to be mirrored from the routed job to the source job.}
     \label{snip:snippet2}
 \end{snippet}
 %\end{figure}
@@ -284,9 +299,9 @@ code to terminate the corresponding VM instance.
 ~
 
 Users can, if they prefer, provide the VM image they need themselves. 
-This is done by passing URL pointing at the VM image as a job classad:
+This is done by passing an URL pointing at the VM image as a job classad:
 \begin{center}
-    +virtualgridsite\_url = \textless URL with the image \textgreater
+    +virtualgridsite\_url = \textless URL with the image\textgreater
 \end{center}
 
 As can be seen in Figure \ref{fig:custom}, 
@@ -311,7 +326,7 @@ This way it becomes trivial to determine whether the requested image has already
 
 Because the configuration files, as well as the OpenStack credential files, 
 are placed on the same CE host, it is important to prevent the user's jobs from running on that host.
-This is prevented by adding the following setup.
+This is prevented by adding the configuration shown in Snippet \ref{snip:snippet3}.
 
 
 %\begin{figure}[h]
@@ -319,7 +334,7 @@ This is prevented by adding the following setup.
     \centering
     \renewcommand\figurename{Snippet}
     \includegraphics[width=0.95\textwidth]{snippet3.png}
-    \caption{Setup to prevent user's jobs being forked at the HTCondor-CE host}
+    \caption{Setup to prevent user's jobs being forked at the HTCondor-CE host.}
     \label{snip:snippet3}
 \end{snippet}
 %\end{figure}
@@ -355,19 +370,19 @@ state. Instead, the Job Router tries again, after 30 seconds, in an infinite loo
 ~
 
 For the mirroring of the classads from the routed job back to the source job, 
-it is required that the UPDATE hook send the whole classad to standard output. 
-It has been found that actions fail due to hidden bugs in the code. 
+it is required that the UPDATE hook sends the whole classad to standard output. 
+It has been found that action fails due to hidden bugs in the code. 
 
 ~
 
 It is not easy to manage a job when its requirements cannot be satisfied by any
-node in the backend batch system nor any currently available VM image. 
+node in the back-end batch system nor any currently available VM image. 
 The solution implemented, for the time being, is to detect that case early in
 the job cycle management, and create a dedicated route for it. 
 To detect this case, we leverage a feature that allows for the partial creation of the routing table by code.
-This code reads the configuration files with all avaible images types, and builds the logic to identify jobs that do not meet any of those criteria. 
+This code reads the configuration files with all available image types, and builds the logic to identify jobs that do not meet any of those criteria. 
 When this ocurrs, the job is transformed in place -and therefore not routed to
-the backend batch queue-, with an extra classad (set\_noroute=True) to prevent it from being considered again for routing.
+the back-end batch queue-, with an extra classad (set\_noreroute=True) to prevent it from being considered again for routing.
 This leaves the job in permanent IDLE status, making it a candidate for
 explicit removal. It can also be cleaned up automatically if a
 periodic\_remove expression is added to its classad definition.
@@ -377,7 +392,7 @@ periodic\_remove expression is added to its classad definition.
     \centering
     \renewcommand\figurename{Snippet}
     \includegraphics[width=0.95\textwidth]{snippet4.png}
-    \caption{location of code with routing policies}
+    \caption{location of code with routing policies.}
     \label{snip:snippet4}
 \end{snippet}
 %\end{figure}
@@ -399,7 +414,7 @@ periodic\_remove expression is added to its classad definition.
     \centering
     \renewcommand\figurename{Snippet}
     \includegraphics[width=0.95\textwidth]{snippet5.png}
-    \caption{Example of routing table to manage jobs with requirements that cannot be satisfied}
+    \caption{Example of routing table to manage jobs with requirements that cannot be satisfied. The classad noreroute will be detected, and used to prevent this job from being routed again.}
     \label{snip:snippet5}
 \end{snippet}
 %\end{figure}
@@ -425,9 +440,9 @@ periodic\_remove expression is added to its classad definition.
 
 Another problem found is related to the present configuration after installation rather than code design. 
 The HTCondor-CE only allows, by default, jobs being routed in certain ways -more exactly, to certain Job Universes-.
-It is easy to workaround this constraint by overriding the right configuration
-variable (JOB\_ROUTER\_SOURCE\_SOURCE\_JOB\_CONSTRAINT), removing that specific
-constraint.
+It is easy to workaround this constraint by overriding the configuration
+variable JOB\_ROUTER\_SOURCE\_SOURCE\_JOB\_CONSTRAINT, 
+removing that specific constraint, as shown in Snippet \ref{snip:snippet6}.
 
 %\begin{figure}[h]
 \begin{snippet}[h]
@@ -454,13 +469,15 @@ constraint.
 
 \section{Future work}
 
+~
+
 This work can be improved in several ways. 
 
 ~
 
 First, it should be straigthforward to expand the same concept to other
 platforms beyond OpenStack. For example, to AWS, 
-or remote clusters using the BOSCO-CE mechanism.
+or remote clusters using the BOSCO-CE mechanism \cite{boscoce}.
 
 ~
 

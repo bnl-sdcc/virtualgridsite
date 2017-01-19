@@ -7,14 +7,15 @@
 % Bibliography created with iopart-num v2.0
 % /biblio/bibtex/contrib/iopart-num
 
-\bibitem{openstack}
-OpenStack LLC 2012 "OpenStack: The Open Source Cloud Operating System"
-      {\em [Online]. Available: http://www.openstack.org/software/}
 
 \bibitem{opennebula}
 I.M. Llorente, R. Moreno-Vozmediano, R.S. Montero 2009
 "Cloud computing for on-demand grid resource provisioning"
 {\em Advances in Parallel Computing, IOS Press} {\bf Vol. 18} 177-191
+
+\bibitem{openstack}
+OpenStack LLC 2012 "OpenStack: The Open Source Cloud Operating System"
+      {\em [Online]. Available: http://www.openstack.org/software/}
 
 \bibitem{condorce}
 Bockelman B, Cartwright T,  Frey J, Fajardo E M, Lin B, Selmeci M, Tannenbaum T and Zvada M 2015 "Commissioning the HTCondor-CE for the Open Science Grid"
@@ -25,10 +26,16 @@ Thain D, Tannenbaum T and Livny M 2005 "Distributed Computing in Practice: The C
       {\em Concurrency and Computation: Practice and Experience} {\bf 17, No. 2-4} 323-56
 
 \bibitem{jobrouter}
-      {\em [Online documentation]. http://research.cs.wisc.edu/htcondor/manual/v8.5/4\_4Hooks.html}
+      {\em [Online documentation]. http://research.cs.wisc.edu/htcondor/manual/v8.4/4\_4Hooks.html}
 
 \bibitem{condorec2}
-      {\em [Online documentation]. http://research.cs.wisc.edu/htcondor/manual/v8.5/5\_3Grid\_Universe.html\#SECTION00636000000000000000}
+      {\em [Online documentation]. http://research.cs.wisc.edu/htcondor/manual/v8.4/5\_3Grid\_Universe.html\#SECTION00636000000000000000}
+
+\bibitem{boscoce}
+Weitzel D and Bockelman B 2017 "Contributing opportunistic resources to the grid with htcondor-ce-bosco"
+      {\em To be published in Journal of Physics: Conference Series} 
+
+
 
 \end{thebibliography}
 
