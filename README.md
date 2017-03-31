@@ -1,2 +1,1 @@
-# virtualgridsite
-Interfacing standard grid HTCondor-CE with virtualization platforms
+This repository has moved to [https://github.com/bnl-sdcc/virtualgridsite](https://github.com/bnl-sdcc/virtualgridsite)
